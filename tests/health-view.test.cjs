@@ -1,0 +1,9 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),Forge=require('../forge.js'),Martial=require('../martial.js');
+const elements=new Map();let changes=0;
+class Element{constructor(){this.hidden=true;this.children=[];this.style={};this.tagName='DIV';this.textContent='';}querySelector(id){return el(id);}querySelectorAll(){return [];}setAttribute(){}focus(){ctx.document.activeElement=this;}append(...x){this.children.push(...x);}replaceChildren(...x){this.children=x;}}
+const el=id=>{if(!elements.has(id))elements.set(id,new Element());return elements.get(id);},ctx={Forge,Martial,document:{querySelector:el,createElement:()=>new Element()}};ctx.window=ctx;vm.createContext(ctx);vm.runInContext(fs.readFileSync(require.resolve('../health.js'),'utf8'),ctx);
+const s=new Forge.ForgeState(),hero=Martial.person('hero');s.recordVitals({...hero,hp:40,mp:5});const health=new ctx.HealthView(s,()=>hero,()=>{},()=>{},()=>changes++);health.open();assert.equal(el('#health-hp').textContent,'40 / 100');assert.equal(el('#health-mp').textContent,'5 / 20');
+el('#hero-name-input').value='竹间客';el('#hero-name-save').onclick();assert.equal(s.heroName,'竹间客');assert.equal(el('#health-name').textContent,'竹间客');
+const doctor=new ctx.DoctorView(s,()=>hero,()=>{},()=>changes++);doctor.open();assert.match(el('#doctor-condition').textContent,/竹间客/);assert.equal(el('#doctor-treat').disabled,false);el('#doctor-treat').onclick();assert.equal(s.hpMissing,0);assert.equal(s.mpMissing,0);assert.equal(el('#doctor-treat').disabled,true);
+el('#doctor-goods').children[0].children[0].onclick();assert.equal(s.medicines.bandage,1);s.herbs.baizhi=1;doctor.render();el('#doctor-herbs').children[0].children[0].onclick();assert.equal(s.herbs.baizhi,0);assert.ok(changes>=4);
+console.log('PASS real body/doctor views: vital bars, name editing, treatment, medicine purchase, herb sale and disabled healthy treatment');

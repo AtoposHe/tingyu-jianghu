@@ -30,20 +30,5 @@
     }
     handleKey(e){if(e.key==='Escape'){e.preventDefault();if(this.pending)this.cancel();else this.close();}if(e.key==='Tab'){const buttons=[...this.root.querySelectorAll('button')].filter(b=>!b.disabled&&!b.closest('[hidden]'));const i=buttons.indexOf(document.activeElement);e.preventDefault();buttons[(i+(e.shiftKey?-1:1)+buttons.length)%buttons.length]?.focus();}}
   }
-  class OutskirtsView{
-    constructor(store,onOpen,onClose,onChange){this.store=store;this.onOpen=onOpen;this.onClose=onClose;this.onChange=onChange;this.root=document.querySelector('#outskirts');this.$=s=>this.root.querySelector(s);this.selected=null;this.clock=0;
-      document.querySelector('#outskirts-toggle').onclick=()=>this.open();this.$('#outskirts-close').onclick=()=>this.close();this.$('#mine-confirm').onclick=()=>this.collect();
-    }
-    get active(){return !this.root.hidden;}
-    open(){if(this.active||this.onOpen()===false)return;this.root.hidden=false;this.selected=null;this.$('#mine-feedback').textContent='';this.render();this.clock=setInterval(()=>this.render(),1000);this.$('#outskirts-close').focus({preventScroll:true});}
-    close(){clearInterval(this.clock);this.root.hidden=true;this.selected=null;this.onClose();}
-    render(){this.$('#outskirts-stocks').textContent=`铁矿石 ${this.store.ores.iron}　铜矿石 ${this.store.ores.copper}`;const layer=this.$('#ore-nodes');layer.replaceChildren();
-      for(const node of Forge.nodes){const b=document.createElement('button'),remaining=this.store.remaining(node.id);b.type='button';b.className='ore-node '+node.ore;b.style.left=node.x+'%';b.style.top=node.y+'%';b.setAttribute('aria-pressed',String(this.selected===node.id));b.textContent=Forge.ores[node.ore].name+(remaining?` · ${remaining}秒`:'');b.onclick=()=>{this.selected=node.id;this.render();this.$('#mine-confirm').focus({preventScroll:true});};layer.append(b);}
-      const node=Forge.nodes.find(n=>n.id===this.selected),remaining=node?this.store.remaining(node.id):0;
-      this.$('#mine-confirm').disabled=!node||remaining>0;this.$('#mine-confirm').textContent=node?remaining?`矿脉恢复中 · ${remaining}秒`:`F 采集${Forge.ores[node.ore].name} ×1`:'选择矿点后按 F 采集';
-    }
-    collect(){if(!this.selected)return;if(this.store.mine(this.selected)){this.$('#mine-feedback').textContent='矿石已放入行囊。回铁铺可以锻造或出售。';this.onChange();}else this.$('#mine-feedback').textContent='此处矿脉尚未恢复。';this.render();}
-    handleKey(e){if(e.key.toLowerCase()==='f'){e.preventDefault();if(!e.repeat)this.collect();}if(e.key==='Escape'){e.preventDefault();this.close();}if(e.key==='Tab'){const buttons=[...this.root.querySelectorAll('button')].filter(b=>!b.disabled);const i=buttons.indexOf(document.activeElement);e.preventDefault();buttons[(i+(e.shiftKey?-1:1)+buttons.length)%buttons.length]?.focus();}}
-  }
-  window.SmithyView=SmithyView;window.OutskirtsView=OutskirtsView;
+  window.SmithyView=SmithyView;
 })();

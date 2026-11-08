@@ -2,7 +2,7 @@
 (() => {
   'use strict';
   const martial=typeof module!=='undefined'&&module.exports?require('./martial.js'):globalThis.Martial;
-  const fighter=profile=>({...profile,skills:[...profile.skills],hp:profile.maxHp,mp:profile.maxMp,guard:0});
+  const fighter=profile=>({...profile,skills:[...profile.skills],hp:profile.currentHp??profile.maxHp,mp:profile.currentMp??profile.maxMp,guard:0});
   const create=(hero=martial.person('hero'),opponent='trainer')=>({
     round:1,phase:'player',hero:fighter(hero),enemy:fighter(martial.person(opponent))
   });

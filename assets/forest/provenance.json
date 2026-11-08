@@ -1,0 +1,48 @@
+{
+  "tool": "built-in image_gen",
+  "assets": [
+    {
+      "id": "forest",
+      "path": "assets/maps/forest.png",
+      "prompt": "Beautiful detailed hand-painted guofeng Chinese wuxia game art, muted jade green, warm stone and paper tones, watercolor and ink texture, consistent with the existing Jiangnan chibi wuxia game. A very richly detailed SECOND EXPLORABLE FOREST MAP, overhead three-quarter elevated 2D RPG view, landscape 3:2 composition, NO horizon, show a whole playable area of forest floor. North is the TOP EDGE. A dirt road enters from the TOP EDGE at exactly one third of image width and winds through the central glade to the bottom. Dense varied broadleaf woods, old pines, bamboo groves, shrubs and flowers at all edges and in small islands with walkable gaps. UPPER LEFT quadrant: large bamboo grove with an EMPTY SMALL GRASS CLEARING reserved for a separately layered clinic at x20% y20%, connecting footpath to main road, do not draw a house there. RIGHT HALF: narrow turquoise creek meanders from x85% at top through x73% y50% to x62% bottom; small wooden crossing bridges centered around x76% y40% and x66% y75%. EASTERN SIDE: layered rock and mineral cliffs, rusty copper seams around x86% y40%, grey iron rock outcrops around x80% y80%. LEFT MID: scattered mossy rocks with iron flecks x22% y48%, an abandoned wooden cart with broken wheel, fallen log, vine-covered old stone shrine. LOWER LEFT: fern glade, thick roots, mushrooms, tiny spring pool not blocking main path. BOTTOM CENTER: old milestone and narrow branching trail, more forest beyond. Add small stone steps, fallen leaves, fireflies, fern beds, root clusters, weathered fences, little cairns, rope railings near crossings, hanging vines, tree stumps, plenty of varied environmental storytelling and depth. Keep the central path and branches visibly OPEN for character walking, not an empty flat field. No people, no animals, no UI, no text, no labels.",
+      "transparent": false,
+      "reference": null
+    },
+    {
+      "id": "clinic",
+      "path": "assets/forest/clinic.png",
+      "prompt": "Beautiful detailed hand-painted guofeng Chinese wuxia game art, muted jade green, warm stone and paper tones, watercolor and ink texture, consistent with the existing Jiangnan chibi wuxia game. One complete standalone Jiangnan village herbal medicine clinic building, three-quarter top-down/isometric RPG prop. Grey curved tile roof with several tiers, white plaster and warm dark wood walls, small front veranda facing DOWN toward viewer, green medicine curtain without writing, wooden lattice windows, bamboo drying racks holding bundles of herbs, hanging dried roots under eaves, two clay jars, stone steps in front, small herb garden planter on one side. Cozy humane atmosphere, slightly weathered and richly detailed. Entire roof, veranda, side walls, steps and racks visible. True transparent background, no ground scene, no trees, no people, no text, no characters, no watermark.",
+      "transparent": true,
+      "reference": null
+    },
+    {
+      "id": "doctor",
+      "path": "assets/q/doctor.png",
+      "prompt": "Beautiful detailed hand-painted guofeng Chinese wuxia game art, muted jade green, warm stone and paper tones, watercolor and ink texture, consistent with the existing Jiangnan chibi wuxia game. STYLE reference is the existing chibi hero, NOT identity. Draw a DIFFERENT character: a kindly mature Chinese male doctor in his fifties, slim build, greying hair tied neatly under a simple jade-green cloth cap, gentle narrow eyes and short neat moustache/goatee, pale cream and sage green long scholar robe, brown cloth shoes, a small herbal medicine satchel at waist, holding a folded bamboo medical booklet in one hand and a small medicine pouch in the other. Complete full body, two complete visible hands and both feet, large-head chibi proportions, standing relaxed three-quarter facing right. Detailed embroidered cuffs but modest rural physician, no weapons. True transparent background, no scenery, no text, no watermark.",
+      "transparent": true,
+      "reference": "assets/q/hero-idle.png"
+    },
+    {
+      "id": "bamboo",
+      "path": "assets/forest/bamboo.png",
+      "prompt": "Beautiful detailed hand-painted guofeng Chinese wuxia game art, muted jade green, warm stone and paper tones, watercolor and ink texture, consistent with the existing Jiangnan chibi wuxia game. One standalone dense cluster of living green BAMBOO for a top-down/isometric RPG foreground layer. Six to eight slender jade bamboo stems with layered graceful small leaves, height varied, visible roots and a small tuft at base, foliage beautifully detailed with subtle light and dark clusters. Whole canopy and base complete with transparent padding. True transparent background, no rectangular ground tile, no buildings, no people, no text, no shadows cast outside cluster.",
+      "transparent": true,
+      "reference": null
+    },
+    {
+      "id": "baizhi",
+      "path": "assets/forest/baizhi.png",
+      "prompt": "Beautiful detailed hand-painted guofeng Chinese wuxia game art, muted jade green, warm stone and paper tones, watercolor and ink texture, consistent with the existing Jiangnan chibi wuxia game. Single collectible medicinal herb plant sprite for an elevated three-quarter RPG game: a lush clump of Chinese angelica (baizhi) with several feathery green leaves and small white umbrella-shaped flower clusters on thin stems, tiny root base visible, readable silhouette at small size. Whole plant isolated, charming hand-painted game botanical illustration, true transparent background, no pot, no landscape, no text, no watermark.",
+      "transparent": true,
+      "reference": null
+    },
+    {
+      "id": "lingzhi",
+      "path": "assets/forest/lingzhi.png",
+      "prompt": "Beautiful detailed hand-painted guofeng Chinese wuxia game art, muted jade green, warm stone and paper tones, watercolor and ink texture, consistent with the existing Jiangnan chibi wuxia game. Single collectible lingzhi medicinal fungus sprite for a three-quarter overhead RPG game: three beautiful small reddish brown lacquered fan-shaped reishi mushrooms with warm amber rims growing from a short mossy fallen branch, richly detailed but readable at small size. Whole clump isolated, hand-painted botanical game prop, true transparent background, no landscape, no pot, no text, no watermark.",
+      "transparent": true,
+      "reference": null
+    }
+  ],
+  "notes": "Original PNG pixels preserved; layered scenery, collision, depth sorting and herb respawns are implemented in code."
+}

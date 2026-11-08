@@ -10,8 +10,4 @@ el('#smithy-goods').children[0].children[0].onclick();assert.equal(state.gold,50
 el('#smithy-goods').children[0].children[0].onclick();el('#forge-confirm').onclick();assert.equal(state.gold,35);assert.equal(state.weapons.wood,1);el('#forge-confirm').onclick();assert.equal(state.gold,35,'Duplicate confirm settles only once');
 for(let i=0;i<2;i++){for(const n of Forge.nodes)state.mine(n.id);now+=60000;}shop.render();
 assert.equal(el('#smithy-recipes').children[0].children[0].disabled,false);el('#smithy-recipes').children[0].children[0].onclick();el('#forge-confirm').onclick();assert.equal(state.gold,25);assert.equal(state.weapons.qingfeng,2);assert.equal(state.crafted,true);assert.ok(changes>=3);
-const mine=new context.OutskirtsView(state,()=>{},()=>{},()=>changes++);mine.open();
-const count=state.ores.iron;el('#ore-nodes').children[0].onclick();assert.equal(state.ores.iron,count);mine.handleKey({key:'f',repeat:true,preventDefault(){}});assert.equal(state.ores.iron,count);
-mine.handleKey({key:'f',repeat:false,preventDefault(){}});assert.equal(state.ores.iron,count+1);mine.handleKey({key:'f',repeat:false,preventDefault(){}});assert.equal(state.ores.iron,count+1);
-mine.close();assert.equal(mine.active,false);
-console.log('PASS real shop order cancel/confirm, one-time claim, confirmed purchase/craft, double confirmation guard and F-only mining');
+console.log('PASS real shop order cancel/confirm, one-time claim, confirmed purchase/craft and double confirmation guard');

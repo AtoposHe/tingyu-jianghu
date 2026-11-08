@@ -16,3 +16,5 @@ assert.equal(moves.sample(moves.profiles.jab,.2).palm,0);
 assert.ok(moves.profiles.mountain.knockback>moves.profiles.straight.knockback);
 assert.notEqual(moves.profiles.jab.hitAt,moves.profiles.straight.hitAt);
 console.log('PASS finite poses, contact timing, palm charge and distinct reactions');
+
+assert.ok(moves.profiles.slash.duration<.8);assert.ok(moves.profiles.slash.duration*moves.profiles.slash.hitAt<.3,"A sword lands within 300 ms rather than a slow one-second wind-up");

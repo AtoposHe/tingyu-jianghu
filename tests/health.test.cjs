@@ -1,0 +1,14 @@
+const assert=require('node:assert/strict'),F=require('../forge.js'),M=require('../martial.js'),rules=require('../combat-rules.js');
+const mem=new Map(),storage={getItem:k=>mem.get(k),setItem:(k,v)=>mem.set(k,v)};let s=new F.ForgeState(storage),hero=M.person('hero');
+assert.equal(s.condition(hero).status,'身体康健');assert.equal(s.treat(hero).ok,false);assert.equal(s.gold,50);
+s.recordVitals({...hero,hp:0,mp:3});assert.equal(s.heroProfile(hero).currentHp,1);assert.equal(s.heroProfile(hero).currentMp,3);
+let battle=rules.create(s.heroProfile(hero));assert.equal(battle.hero.hp,1,'Rematch cannot reset injury for free');assert.equal(battle.hero.mp,3);
+assert.equal(s.buyMedicine('bandage').ok,true);assert.equal(s.gold,42);assert.equal(s.useMedicine('bandage',hero).ok,true);assert.equal(s.heroProfile(hero).currentHp,31);assert.equal(s.medicines.bandage,undefined);
+assert.equal(s.useMedicine('bandage',hero).ok,false);s.herbs.lingzhi=1;assert.equal(s.sellHerb('lingzhi').ok,true);assert.equal(s.gold,54);assert.equal(s.herbs.lingzhi,0);
+const cost=s.condition(hero).cost,prior=s.gold;assert.equal(s.treat(hero).ok,true);assert.equal(s.gold,prior-cost);assert.equal(s.heroProfile(hero).currentHp,100);assert.equal(s.heroProfile(hero).currentMp,20);
+s.buyMedicine('salve');const n=s.medicines.salve;assert.equal(s.useMedicine('salve',hero).ok,false);assert.equal(s.medicines.salve,n,'Healthy players do not consume medicine');
+s.gold=0;s.recordVitals({...hero,hp:30,mp:0});const before=JSON.stringify(s);assert.equal(s.treat(hero).ok,false);assert.equal(JSON.stringify(s),before,'Insufficient gold never partially treats or charges');
+assert.equal(s.setName('听雨客'),true);assert.equal(s.setName('   '),false);assert.equal(s.setName('<img>'),false);assert.equal(s.setName('一二三四五六七八九十一'),false);assert.equal(s.heroProfile(hero).name,'听雨客');
+s.save();s=new F.ForgeState(storage);assert.equal(s.heroName,'听雨客');assert.equal(s.heroProfile(hero).currentHp,30);assert.equal(s.hpMissing,70);assert.equal(s.gold,0);
+assert.equal(s.heroProfile(M.person('hero',21)).currentHp,32,'Training increases max and current health together while preserving the wound deficit');
+console.log('PASS persistent wounds/energy, no free rematch healing, medicine caps and consumption, herb sale, atomic treatment and validated persisted name');

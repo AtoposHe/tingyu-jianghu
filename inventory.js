@@ -36,9 +36,12 @@
       if(!id)return null;
       const [kind,key]=id.split(':');
       if(kind==='ore'&&this.economy&&Object.hasOwn(Forge.ores,key)){const ore=Forge.ores[key];return {...ore,count:this.economy.ores[key],ore:key,kind:'锻造矿石',description:'村外采集所得，可交给铁师傅锻造武器，也可在铁铺出售。'};}
+      if(kind==='herb'&&this.economy&&Object.hasOwn(Forge.herbs,key)){return {...Forge.herbs[key],count:this.economy.herbs[key],kind:'采集药草'};}
+      if(kind==='medicine'&&this.economy&&Object.hasOwn(Forge.medicines,key)){return {...Forge.medicines[key],count:this.economy.medicines[key],medicine:Forge.medicines[key],kind:'药品'};}
       if(kind==='weapon'&&this.economy&&Object.hasOwn(Forge.weapons,key)){const weapon=Forge.weapons[key];return {...weapon,count:this.economy.weapons[key],weapon,kind:`兵器 · 武力 +${weapon.attack}`};}
       const item=Gathering.items[id];return item?{...item,count:this.store.counts[id],src:`assets/town/${item.art}.png`}:null;
     }
+    icon(item){return item.src?`<img src="${item.src}" alt="${item.name}">`:item.medicine?'<span class="medicine-icon">药</span>':`<span class="ore-icon ${item.ore}">矿</span>`;}
     renderBooks(){
       const ids=this.progression?.manualIds||[],grid=document.querySelector('#manual-grid');grid.replaceChildren();
       document.querySelector('#manual-empty').hidden=ids.length>0;
@@ -71,20 +74,21 @@
       document.querySelector('#bag-gold').textContent=String(this.economy?.gold||0);
       document.querySelector('#bag-equipped').textContent=this.economy?.equipped?`当前装备 · ${this.economy.equipped.name}（武力 +${this.economy.equipped.attack}）`:'当前装备 · 徒手';
       const entries=Object.keys(Gathering.items).filter(id=>this.store.counts[id]);
-      if(this.economy){for(const id of Object.keys(Forge.ores))if(this.economy.ores[id])entries.push('ore:'+id);for(const id of Object.keys(Forge.weapons))if(this.economy.weapons[id])entries.push('weapon:'+id);}
+      if(this.economy){for(const id of Object.keys(Forge.ores))if(this.economy.ores[id])entries.push('ore:'+id);for(const id of Object.keys(Forge.weapons))if(this.economy.weapons[id])entries.push('weapon:'+id);for(const id of Object.keys(Forge.herbs))if(this.economy.herbs[id])entries.push('herb:'+id);for(const id of Object.keys(Forge.medicines))if(this.economy.medicines[id])entries.push('medicine:'+id);}
       if(!entries.includes(this.selected))this.selected=entries[0]||null;
       const total=this.store.total+(this.economy?.total||0);
       document.querySelector('#bag-summary').textContent=isBooks?`已学典籍 · ${this.progression?.manualIds.length||0} 部 · 不占物品格`:`物品材料 · ${entries.length} 种 · 共 ${total} 件`;
       document.querySelector('#bag-count').textContent=total;
       const grid=document.querySelector('#bag-grid');grid.replaceChildren();
       for(const id of entries){const item=this.item(id),b=document.createElement('button');b.className='bag-slot';b.type='button';b.setAttribute('aria-pressed',String(id===this.selected));b.setAttribute('aria-label',`${item.name}，${item.count} 件`);
-        b.innerHTML=`${item.src?`<img src="${item.src}" alt="">`:`<span class="ore-icon ${item.ore}">矿</span>`}<span>${item.name}</span><b>×${item.count}</b>`;
+        b.innerHTML=`${this.icon(item)}<span>${item.name}</span><b>×${item.count}</b>`;
         b.onclick=()=>{this.cancelDiscard();this.selected=id;this.render();grid.querySelector(`[aria-label^="${item.name}"]`)?.focus();};
         b.oncontextmenu=e=>{e.preventDefault();this.requestDiscard(id);};grid.append(b);}
       for(let i=entries.length;i<12;i++){const slot=document.createElement('div');slot.className='bag-slot empty';slot.setAttribute('aria-hidden','true');grid.append(slot);}
       const detail=document.querySelector('#bag-detail'),item=this.item(this.selected);
-      detail.innerHTML=item?`${item.src?`<img src="${item.src}" alt="${item.name}">`:`<span class="ore-icon ${item.ore}">矿</span>`}<h3>${item.name}</h3><p>${item.kind} · 拥有 ${item.count} 件</p><p>${item.description}</p>`:'<h3>行囊待满</h3><p>收集花卉、到村外采矿，或向铁师傅领取武师赠剑。</p>';
+      detail.innerHTML=item?`${this.icon(item)}<h3>${item.name}</h3><p>${item.kind} · 拥有 ${item.count} 件</p><p>${item.description}</p>`:'<h3>行囊待满</h3><p>收集花卉、到村外采矿，或向铁师傅领取武师赠剑。</p>';
       if(item?.weapon){const button=document.createElement('button');button.type='button';button.className='equip-button';const equipped=this.economy.equippedId===item.weapon.id;button.textContent=equipped?'卸下武器 · 恢复徒手':'装备'+item.name;button.onclick=()=>{this.economy.equip(equipped?null:item.weapon.id);this.onGearChange();this.render();};detail.append(button);}
+      if(item?.medicine){const button=document.createElement('button');button.type='button';button.className='equip-button';button.textContent='服用'+item.name;button.onclick=()=>{const result=this.economy.useMedicine(item.medicine.id,this.progression.hero);if(result.ok)this.onGearChange();this.render();document.querySelector('#bag-feedback').textContent=result.message;};detail.append(button);}
       document.querySelector('#bag-save').textContent=this.store.saved?'花卉收藏自动保存在当前浏览器。':'当前浏览器无法保存，收藏将在关闭页面后丢失。';
       document.querySelector('#discard-menu').hidden=!this.pendingDiscard;
       if(this.pendingDiscard)document.querySelector('#discard-name').textContent=`丢弃 ${this.item(this.pendingDiscard).name} ×1？`;

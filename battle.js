@@ -63,7 +63,7 @@
       this.motion=null;this.floaters=[];this.wait=0;this.time=0;this.last=0;this.hitPause=0;
       this.root.hidden=false;this.root.closest('.game-frame').classList.add('in-battle');
       this.$('#battle-result').hidden=true;this.$('#combat-log').replaceChildren();
-      this.log(`切磋开始。${this.state.hero.realmName}对${this.state.enemy.realmName}，双方气血、灵力回满。每整回合结束双方各自回灵。`);
+      this.log(`切磋开始。${this.state.hero.realmName}对${this.state.enemy.realmName}，少侠按当前身体状况入场。每整回合结束双方各自回灵。`);
       this.resize();this.sync();this.callout(this.state.hero.weaponId?'你的回合 · 以剑入江湖':'你的回合 · 以拳入江湖');
       this.$('#attack-button').focus({preventScroll:true});
       this.raf=requestAnimationFrame(t=>this.frame(t));
@@ -102,6 +102,7 @@
         }
         this.$(`#${side}-realm`).textContent=`${actor.realmName} · 回灵 ${actor.regen}`;
       }
+      this.$('#battle-hero-name').textContent=this.state.hero.name;
       this.$('#battle-round').textContent=String(this.motion?.round ?? this.state.round);
       this.stage.classList.toggle('skill-active',this.motion?.action==='skill');
       const ready=this.assetsReady&&this.sceneReady&&!this.busy&&this.state.phase==='player';
@@ -136,8 +137,9 @@
     hit() {
       const m=this.motion,round=this.state.round;
       const outcome=CombatRules.resolve(this.state,m.side,m.action);
+      this.equipment?.recordVitals(this.state.hero);
       const target=m.side==='hero'?'enemy':'hero';
-      if(m.action==='skill')this.hitPause=.075;
+      if(m.action==='skill')this.hitPause=.075;else if(m.profile.id==='slash')this.hitPause=.022;
       this.floaters.push({big:m.action==='skill',side:target,text:`−${outcome.damage}`,type:'damage',t:0});
       if(outcome.mpChange) this.floaters.push({side:m.side,text:`灵力 ${outcome.mpChange>0?'+':''}${outcome.mpChange}`,type:'mana',t:0});
       if(outcome.guarded)this.floaters.push({side:target,text:'护势 · 减伤 60%',type:'guard',t:0});
@@ -154,6 +156,7 @@
       this.busy=false;this.motion=null;this.wait=0;
       this.state.phase=kind;
       this.progression.recordBattle(kind,this.hadSkill);
+      this.equipment?.recordVitals(this.state.hero);
       this.$('#battle-result').hidden=false;
       const title=kind==='victory'?'切磋获胜':kind==='defeat'?'胜败乃兵家常事':'承让，下次再会';
       this.$('#result-title').textContent=title;
@@ -165,7 +168,7 @@
         :'你抱拳认输，武青山收势回礼：“先认真交手，再谈根基。准备好随时来。”';
       this.$('#battle-again').hidden=this.progression.needsLesson;
       this.$('#battle-return').textContent=this.progression.needsLesson?'向武师请教 ↗':'返回听雨村 ↗';
-      this.log(title+'。返回村庄后不保留切磋伤势。');this.callout('点到即止 · 以武会友');this.sync();
+      this.log(title+'。伤势与耗用灵力已保留；可服药或去竹林医馆调养。');this.callout('点到即止 · 以武会友');this.sync();
       this.$('#battle-return').focus({preventScroll:true});
     }
     yield() {if(this.active&&!this.busy&&this.state.phase==='player')this.finish('yield');}
@@ -176,17 +179,17 @@
     }
     frame(now) {
       if(!this.active)return;
-      const dt=this.last?Math.min((now-this.last)/1000,.05):0;this.last=now;this.time+=dt;
+      const dt=this.last?Math.min((now-this.last)/1000,.12):0;this.last=now;this.time+=dt;
       for(const f of this.floaters)f.t+=dt;
       this.floaters=this.floaters.filter(f=>f.t<1.3);
       if(this.motion) {
-        const motionDt=this.hitPause>0?0:dt;this.hitPause=Math.max(0,this.hitPause-dt);
+        const motionDt=Math.max(0,dt-this.hitPause);this.hitPause=Math.max(0,this.hitPause-dt);
         this.motion.t+=motionDt;const p=this.motion.t/this.motion.duration;
         if(p>=this.motion.profile.hitAt&&!this.motion.hit){this.motion.hit=true;this.hit();}
         if(p>=1) {
           this.motion=null;
           if(['victory','defeat'].includes(this.state.phase))this.finish(this.state.phase);
-          else if(this.state.phase==='enemy'){this.wait=.6;this.callout('武师凝神，准备回击…');this.sync();}
+          else if(this.state.phase==='enemy'){this.wait=this.state.hero.weaponId?.22:.6;this.callout('武师凝神，准备回击…');this.sync();}
           else {this.busy=false;this.callout('你的回合 · 请选择招式');this.sync();this.$('#attack-button').focus({preventScroll:true});}
         }
       } else if(this.wait>0) {
