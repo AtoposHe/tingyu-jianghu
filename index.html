@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#eae5d8">
+  <title>听雨江湖 · 初入听雨村</title>
+  <link rel="stylesheet" href="style.css?v=b05a15b15259">
+  <link rel="stylesheet" href="battle.css?v=6c089af045e4">
+  <link rel="stylesheet" href="map-ui.css?v=7aeaa9b37c58">
+  <link rel="stylesheet" href="inventory.css?v=59de237c12a7">
+  <link rel="stylesheet" href="story.css?v=f303fef5de98">
+</head>
+<body>
+  <main class="shell">
+    <header class="masthead">
+      <a class="brand" href="./" aria-label="听雨江湖首页"><span class="seal">听<br>雨</span><div><h1>听雨江湖</h1><p>A LITTLE WORLD OF WUXIA</p></div></a>
+      <div class="chapter"><span>江湖手记 · 第一回</span><strong>一蓑烟雨，初入江湖。</strong></div>
+      <div class="header-actions"><button id="story-toggle" class="story-toggle" type="button">江湖手记</button><button id="sound-toggle" class="quiet-button" type="button" aria-pressed="false">♫ <span>开启山水声</span></button></div>
+    </header>
+    <section class="game-frame" aria-label="听雨村探索场景">
+      <canvas id="game" width="1280" height="800" tabindex="0" aria-label="用方向键或 WASD 移动，靠近人物后按 E 对话，也可点击地图移动和点击人物对话"></canvas>
+      <div class="map-heading"><strong>听雨村</strong><span>·</span><small id="area-name">南埠村口</small></div>
+      <button class="quest" id="quest" type="button" title="自动前往村长家拜访老村长"><span id="quest-check">○</span><span id="quest-text">拜访老村长</span><span aria-hidden="true">↗</span></button>
+      <button id="interaction" class="interaction" type="button" hidden><kbd>E</kbd> 与老村长交谈</button>
+      <div id="loading" class="loading">正在铺开江湖画卷…</div>
+      <button id="gather-prompt" class="gather-prompt" type="button" hidden><kbd>F</kbd><span id="gather-label">收集</span></button>
+      <div class="map-bottom"><div class="map-buttons"><button id="bag-toggle" class="bag-button" type="button">行囊 <span id="bag-count">0</span> · B</button><button id="find-trainer" class="map-action" type="button">⚔ 寻访武师</button><button id="reset" class="map-action" type="button">↺ 回到村口</button></div></div>
+      <div id="dialogue" class="dialogue" hidden role="dialog" aria-modal="true" aria-labelledby="speaker-name">
+        <div class="portrait-wrap"><img src="assets/q/village-chief.png" alt="老村长，银发白须，拄着木杖，神情亲切"><span>听雨村 · 村长</span></div>
+        <div class="dialogue-content"><div class="speaker-row"><h3 id="speaker-name">老村长</h3><button id="close-dialogue" aria-label="关闭对话" type="button">×</button></div><p id="dialogue-text"></p><div id="choices" class="choices"></div><button id="dialogue-next" type="button">继续 <span>↵</span></button></div>
+      </div>
+      <section id="battle" class="battle" hidden aria-label="演武场回合制切磋">
+        <header class="battle-heading"><div><small id="battle-location">听雨武馆 · 演武院</small><h2>以武会友</h2></div><div class="round-badge">第 <strong id="battle-round">一</strong> 回合<span id="battle-phase">你的回合</span></div><button id="battle-yield" type="button">认输离场 ↗</button></header>
+        <div class="combatants">
+          <div class="fighter-card hero-card"><div class="fighter-title"><span>你</span><strong>无名少侠</strong><small>拳脚 · 初学</small></div><div class="stat"><span>气血</span><div id="hero-hp-meter" class="meter hp" role="progressbar" aria-label="少侠气血" aria-valuemin="0" aria-valuemax="100"><i id="hero-hp-bar"></i></div><b id="hero-hp">100 / 100</b></div><div class="stat"><span>灵力</span><div id="hero-mp-meter" class="meter mp" role="progressbar" aria-label="少侠灵力" aria-valuemin="0" aria-valuemax="60"><i id="hero-mp-bar"></i></div><b id="hero-mp">10 / 60</b></div></div>
+          <span class="versus">切 磋</span>
+          <div class="fighter-card enemy-card"><div class="fighter-title"><span>友</span><strong>陆青山</strong><small>听雨村武师</small></div><div class="stat"><span>气血</span><div id="enemy-hp-meter" class="meter hp" role="progressbar" aria-label="陆青山气血" aria-valuemin="0" aria-valuemax="120"><i id="enemy-hp-bar"></i></div><b id="enemy-hp">120 / 120</b></div><div class="stat"><span>灵力</span><div id="enemy-mp-meter" class="meter mp" role="progressbar" aria-label="陆青山灵力" aria-valuemin="0" aria-valuemax="60"><i id="enemy-mp-bar"></i></div><b id="enemy-mp">30 / 60</b></div></div>
+        </div>
+        <div class="battle-stage" id="battle-stage">
+          <canvas id="battle-canvas" aria-label="双方出招、受击和灵力特效的动态战斗画面"></canvas>
+          <div id="battle-callout" class="battle-callout">拳脚见真章，点到即止。</div>
+          <div class="skill-title" aria-hidden="true"><small>听雨武学</small><strong>推山掌</strong><span>掌风如岳 · 劲贯山河</span></div><span class="stage-caption" id="stage-caption">武馆切磋 · 点到即止</span>
+        </div>
+        <div class="battle-dock"><div class="battle-toolbar"><span class="q-mode-tag">国风Q版 · 以武会友</span><a href="effects.html" target="_blank" rel="noopener">招式观赏 ↗</a><a href="characters.html" target="_blank" rel="noopener">人物图鉴 ↗</a></div><div class="battle-log"><small>战况 · <span id="turn-hint">请选择行动</span></small><ol id="combat-log" aria-live="polite" aria-relevant="additions"></ol></div><div class="battle-actions"><button id="attack-button" class="attack-button" type="button"><span class="action-icon">拳</span><span><strong>普通攻击</strong><small>徒手出拳 · 灵力 +10</small></span><kbd>1</kbd></button><button id="skill-button" class="skill-button" type="button" disabled title="主角尚未习得技能；普通攻击积攒的灵力，习得技能后可用于释放技能。"><span class="action-icon">术</span><span><strong>技能攻击</strong><small>尚未习得 · 暂不可用</small></span><span class="locked-mark">锁</span></button></div><p class="battle-tip">普通攻击积攒灵力；武师施展「推山掌」消耗 20 灵力。每次切磋重置双方状态。</p></div>
+        <div id="battle-result" class="battle-result" hidden role="dialog" aria-modal="true" aria-labelledby="result-title"><div class="result-paper"><small>点到即止 · 以武会友</small><h3 id="result-title">切磋获胜</h3><p id="result-message"></p><div class="result-actions"><button id="battle-again" type="button">再切磋一次</button><button id="battle-return" type="button">返回听雨村 ↗</button></div></div></div>
+      </section>
+    </section>
+    <footer class="below-map"><div class="character-chip"><img src="assets/q/hero-idle.png" alt="Q版无名少侠"><div><strong>无名少侠</strong><span>江湖路远，且行且看。</span></div><span class="level">初涉江湖</span></div><div class="controls"><span><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> / 方向键移动</span><span><kbd>E</kbd> 交谈 · <kbd>1</kbd> 出拳</span><span class="mouse-hint">◇ 点击地面行走 · 点击人物交谈</span></div></footer>
+    <div class="page-note"><span>F 收集花卉 · B 打开行囊</span><span>原创场景 · 本地原型 09</span></div>
+    <div id="announcement" role="status" aria-live="polite"></div>
+  </main>
+  <section id="story-opening" class="story-overlay" role="dialog" aria-modal="true" aria-labelledby="story-title"><div class="story-paper"><span class="story-kicker">听雨江湖 · 第一回</span><h2 id="story-title">一封旧信，半枚镖牌</h2><p class="story-time">景和七年 · 暮春　｜　江南青州 · 听雨村　｜　架空江湖</p><div class="story-columns"><div class="story-copy"><p>十年前的夜渡镖案，早已成了茶客口中的旧闻。如今青州商道重开，封存的镖号却又出现在河埠的货箱上。听雨村依旧炊烟袅袅，平静之下，似有旧事回潮。</p><p>你十八岁，自幼被清河镖局收养，跟着师父做杂役、认路途，只学过几手粗浅拳脚。三个月前，师父随一趟镖队出门，从此音讯全无。你没有名门靠山，也不知自己的身世。</p><p>临行前，你从旧箱底找到半枚刻着水纹的镖牌，以及一封未寄出的信。信封上，只有四个字：听雨村长。</p><blockquote>“若有一日我未能归来，去听雨村。先问来路，再问刀剑。”</blockquote><p>你带着旧信走进村口。此行，先寻师父，也寻一个能让自己立足江湖的答案。</p></div><div class="story-plan"><h3>初入江湖 · 从这里开始</h3><ol id="story-goals"></ol><p class="story-future">后续故事规划 · 尚未开放<br>到杏花酒肆追访夜渡旧闻 → 请铁匠辨认镖牌水纹 → 沿商道寻找失踪镖队。选择如何待人、是否守诺，也将成为江湖成长的一部分。</p></div></div><button id="story-enter" class="story-enter" type="button" disabled>踏入听雨村 ↗</button></div></section>
+  <div id="inventory" class="bag-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="bag-title"><section class="bag-paper"><header class="bag-header"><div><small>江南拾芳 · 随身收藏</small><h2 id="bag-title">少侠行囊</h2></div><button type="button" class="bag-close" id="bag-close" aria-label="关闭背包">×</button></header><p id="bag-summary" class="bag-summary"></p><div class="bag-content"><div id="bag-grid" class="bag-grid" aria-label="背包物品"></div><div class="bag-detail"><div id="bag-detail"></div><div id="discard-menu" class="discard-menu" hidden><p id="discard-name"></p><small>每次丢弃 1 件，丢弃后无法恢复。</small><button id="discard-confirm" type="button">F 确认丢弃</button><button id="discard-cancel" type="button">取消</button></div><p id="bag-feedback" role="status" aria-live="polite"></p></div></div><p class="bag-hint">靠近花草后按 F 收集 · 右键物品后按 F 丢弃 1 件 · Esc 取消 / B 关闭<br><span id="bag-save"></span></p></section></div>
+  <script src="combat-rules.js?v=63e7a4c0273d"></script>
+  
+  <script src="battle-moves.js?v=f5ea6c42d061"></script>
+  <script src="sprite-data.js?v=fbec480159ad"></script>
+  <script src="sprites.js?v=988a672d74dd"></script>
+  <script src="hero-run.js?v=68e877566130"></script>
+  <script src="battle-fx.js?v=576c2b19f755"></script>
+  <script src="battle-scenes.js?v=ff601210da5a"></script>
+  <script src="battle.js?v=c4dcf87f271e"></script>
+  <script src="village-map.js?v=37a599cad30b"></script>
+  <script src="gathering.js?v=d74dd4d7166d"></script>
+  <script src="inventory.js?v=5f279bfc6539"></script>
+  <script src="story.js?v=ff6163a1b341"></script>
+  <script src="story-view.js?v=45f45557c646"></script>
+  <script src="game.js?v=48444708b283"></script>
+</body>
+</html>

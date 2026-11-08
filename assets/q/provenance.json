@@ -1,0 +1,46 @@
+{
+  "tool": "built-in image_gen",
+  "style": "国风Q版",
+  "assets": [
+    {
+      "id": "heroIdle",
+      "file": "hero-idle.png",
+      "source": "/Users/apple/.codex/generated_images/01a1b663-e348-7043-91cf-22f7eeb3194c/exec-eafddd5a-c08e-46b7-a165-778a36ad3dde.png"
+    },
+    {
+      "id": "heroWindup",
+      "file": "hero-windup.png",
+      "source": "/Users/apple/.codex/generated_images/01a1b663-e348-7043-91cf-22f7eeb3194c/exec-6022b50f-9317-47fe-81c4-960dc378c062.png"
+    },
+    {
+      "id": "heroAttack",
+      "file": "hero-attack.png",
+      "source": "/Users/apple/.codex/generated_images/01a1b663-e348-7043-91cf-22f7eeb3194c/exec-542ae386-8462-4e43-8291-f0666f7cb8e5.png"
+    },
+    {
+      "id": "heroHit",
+      "file": "hero-hit.png",
+      "source": "/Users/apple/.codex/generated_images/01a1b663-e348-7043-91cf-22f7eeb3194c/exec-110d49cd-a2c9-4901-b3be-10b6272a0fb3.png"
+    },
+    {
+      "id": "enemyIdle",
+      "file": "trainer-idle.png",
+      "source": "/Users/apple/.codex/generated_images/01a1b663-e348-7043-91cf-22f7eeb3194c/exec-deb8536f-db82-42df-947a-cc3cfed78606.png"
+    },
+    {
+      "id": "enemyAttack",
+      "file": "trainer-punch.png",
+      "source": "/Users/apple/.codex/generated_images/01a1b663-e348-7043-91cf-22f7eeb3194c/exec-89fe41b1-d480-47b9-bc65-fb2b3d050716.png"
+    },
+    {
+      "id": "enemyPalm",
+      "file": "trainer-palm.png",
+      "source": "/Users/apple/.codex/generated_images/01a1b663-e348-7043-91cf-22f7eeb3194c/exec-f3ca6455-79ed-4dcd-b808-35d01f41ce57.png"
+    },
+    {
+      "id": "enemyHit",
+      "file": "trainer-hit.png",
+      "source": "/Users/apple/.codex/generated_images/01a1b663-e348-7043-91cf-22f7eeb3194c/exec-b690e1fe-d5f9-42c2-a1ce-3289d6a9aad9.png"
+    }
+  ]
+}

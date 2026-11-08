@@ -1,0 +1,15 @@
+{
+  "tool": "built-in image_gen",
+  "assets": [
+    {
+      "file": "palm-wave.png",
+      "source": "/Users/apple/.codex/generated_images/01a1b663-e348-7043-91cf-22f7eeb3194c/exec-2d959c35-2067-4875-ade1-4077171bbc07.png",
+      "prompt": "Use case: stylized-concept. Asset type: production-ready 2D Chinese fantasy martial-arts game VFX sprite. Refined NATIONAL-STYLE CHIBI MOBILE RPG effect art, hand-painted luminous jade-teal and warm antique gold with creamy white highlights, elegant cloud-scroll ink-brush shapes, extremely readable silhouette. Single isolated EFFECT ONLY on genuinely transparent alpha background. No character, no arm, no portrait, no scenery, no ground, no black rectangle, no lettering, no watermark, no checkerboard. Soft outer translucent wisps but bright crisp central shapes. All shapes contained within the frame with transparent padding. Draw a magical MOUNTAIN-PUSH PALM energy projectile moving to the RIGHT. Central dominant shape is an upright OPEN PALM made of translucent carved JADE LIGHT, fingers pointing UP, palm projecting force toward the RIGHT. Simplified elegant five-finger icon-like energy silhouette, not a realistic human hand and not severed anatomy. Behind the palm, to the LEFT, flowing horizontal GOLD CLOUD WIND TRAILS and curving teal jade currents sweep backward. The palm should be bright, gold-edged, magical and instantly readable at small game size. Two or three curving cloud crescents frame it, with sparse fine gold motes. Wide dynamic composition roughly 3:2, projectile core at 65% width, tail left. Transparent background, no surrounding opaque haze."
+    },
+    {
+      "file": "palm-impact.png",
+      "source": "/Users/apple/.codex/generated_images/01a1b663-e348-7043-91cf-22f7eeb3194c/exec-5d7c5977-8061-4eda-b226-9195a7edd276.png",
+      "prompt": "Use case: stylized-concept. Asset type: production-ready 2D Chinese fantasy martial-arts game VFX sprite. Refined NATIONAL-STYLE CHIBI MOBILE RPG effect art, hand-painted luminous jade-teal and warm antique gold with creamy white highlights, elegant cloud-scroll ink-brush shapes, extremely readable silhouette. Single isolated EFFECT ONLY on genuinely transparent alpha background. No character, no arm, no portrait, no scenery, no ground, no black rectangle, no lettering, no watermark, no checkerboard. Soft outer translucent wisps but bright crisp central shapes. All shapes contained within the frame with transparent padding. Draw one magical martial-arts IMPACT BURST seen front-on: bright white-gold central flash, large angular JADE CRYSTAL LIGHT shards and teal brushstroke petals radiate outward, with TWO broken gilded shockwave rings, curling CLOUD SCROLL curls, short golden spokes and a few glimmering fragments. Circular starburst / expanding energy rosette, airy transparent gaps, asymmetrical pointed rays for punchy impact, attractive polished game VFX. No hand and no body. Square composition. Transparent alpha background, no square backdrop and no opaque smoke field."
+    }
+  ]
+}

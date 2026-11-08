@@ -1,0 +1,12 @@
+const assert=require('node:assert/strict');
+const FX=require('../battle-fx.js');
+for(let i=0;i<=100;i++)for(const value of Object.values(FX.sample(i/100,.64)))assert.ok(Number.isFinite(value)&&value>=0&&value<=1);
+assert.ok(FX.sample(.2).charge>.5,'Energy must visibly accumulate before launch');
+assert.equal(FX.sample(.6).charge,0,'Charging halo must give way to the projectile');
+assert.equal(FX.sample(.43).launch,0);
+assert.equal(FX.sample(.64).launch,1,'Projectile must reach target on damage frame');
+assert.equal(FX.sample(.63).impact,0,'Impact must not precede damage');
+assert.ok(FX.sample(.69).impact>.8,'Burst must remain readable immediately after contact');
+assert.ok(FX.sample(.98).impact<.05,'Burst must fade before the next turn');
+assert.deepEqual(FX.prototype.shake.call({reducedMotion:true},.69,.64),{x:0,y:0});
+console.log('PASS VFX charge/launch/contact/fade timing and reduced-motion camera');

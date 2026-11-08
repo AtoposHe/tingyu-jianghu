@@ -1,0 +1,41 @@
+{
+  "mode": "built-in image_gen",
+  "assets": [
+    {
+      "id": "dojo",
+      "prompt": "Use case: stylized-concept. Transparent PNG game asset for a refined hand-painted Chinese wuxia Q-version RPG village. Elevated three-quarter top-down camera facing south, blue grey tiled roofs, warm honey timber and ivory plaster, moss green details, clean painterly ink edges, warm natural daylight. Complete isolated asset with genuine transparent alpha outside its silhouette, NO background, glow, gradient backdrop, ground island, text, people or watermark. A substantial village MARTIAL ARTS SCHOOL compound, two joined tiled training halls with an open central south-facing courtyard, handsome timber entrance gate at front left, blank wooden sign plaque above gate, restrained red banners, hanging drum, weapon racks with practice staffs, straw dummy and wooden training posts around edges. Empty open courtyard floor should be transparent so the underlying stone paving is visible. Roofs, gate and all props entirely inside image. Wide landscape3:2 silhouette. Rich details, a complete recognizable martial arts school, not a lone pavilion.",
+      "source": "/Users/apple/.codex/generated_images/01a1b663-e348-7043-91cf-22f7eeb3194c/exec-2bc38182-1155-4767-84c5-abff7c8d7f9b.png",
+      "file": "assets/town/dojo.png"
+    },
+    {
+      "id": "jasmine",
+      "prompt": "Use case: stylized-concept. Transparent PNG game asset for a refined hand-painted Chinese wuxia Q-version RPG village. Elevated three-quarter top-down camera facing south, blue grey tiled roofs, warm honey timber and ivory plaster, moss green details, clean painterly ink edges, warm natural daylight. Complete isolated asset with genuine transparent alpha outside its silhouette, NO background, glow, gradient backdrop, ground island, text, people or watermark. ONE small gatherable cluster of medicinal herb: rich green broad leaves, delicate tiny ivory blossoms, two small roots and a mossy stone. Readable compact game resource icon, square canvas, full silhouette inside with generous transparent padding. No scenery, floor, shadow or border.",
+      "source": "/Users/apple/.codex/generated_images/01a1b663-e348-7043-91cf-22f7eeb3194c/exec-37c2862b-87d1-492c-824a-bcda2ad6eb8f.png",
+      "file": "assets/town/jasmine.png"
+    },
+    {
+      "id": "winehouse",
+      "prompt": "Use case: stylized-concept. Refined hand-painted Chinese Jiangnan wuxia Q-version RPG game asset, elevated three-quarter top-down camera, south-facing facade, blue grey tiled roofs, ivory plaster and warm timber, natural daylight, firm painterly edges. Genuine transparent PNG outside complete asset, no people, text, background gradient, large ground island or watermark. A charming Jiangnan WINE TAVERN, two compact linked whitewashed sections with tiled roofs, open wooden front counter with wine jars, small red cloth hanging banner without text, two outdoor stools, bamboo blinds, red lanterns and ceramic wine urns. Complete compact landscape4:3 building sprite. Small ivy by wall and flower pots at doorway. No surrounding scenery.",
+      "source": "/Users/apple/.codex/generated_images/01a1b663-e348-7043-91cf-22f7eeb3194c/exec-3791245c-9c3e-465c-9cb3-7e5d901d0608.png",
+      "file": "assets/town/winehouse.png"
+    },
+    {
+      "id": "guesthouse",
+      "prompt": "Use case: stylized-concept. Refined hand-painted Chinese Jiangnan wuxia Q-version RPG game asset, elevated three-quarter top-down camera, south-facing facade, blue grey tiled roofs, ivory plaster and warm timber, natural daylight, firm painterly edges. Genuine transparent PNG outside complete asset, no people, text, background gradient, large ground island or watermark. A beautiful compact TWO-STOREY JIANGNAN GUESTHOUSE, whitewashed walls with dark wood windows, stepped horse-head side wall, grey tiled roof, timber balcony, warm lanterns, rolled bamboo blinds, stone doorway steps and elegant flower pots. Complete isolated building, approximately square silhouette, rich lived-in details. No surrounding scenery.",
+      "source": "/Users/apple/.codex/generated_images/01a1b663-e348-7043-91cf-22f7eeb3194c/exec-2d8cee84-6f14-444e-8054-55e8219e3142.png",
+      "file": "assets/town/guesthouse.png"
+    },
+    {
+      "id": "osmanthus",
+      "prompt": "Use case: stylized-concept. Refined hand-painted Chinese Jiangnan wuxia Q-version RPG game asset, elevated three-quarter top-down camera, south-facing facade, blue grey tiled roofs, ivory plaster and warm timber, natural daylight, firm painterly edges. Genuine transparent PNG outside complete asset, no people, text, background gradient, large ground island or watermark. A compact ornamental flowering osmanthus SHRUB in a rounded old ceramic planter, rich green leaves with many little golden orange blossoms. Collectible garden game prop. Square image, full silhouette with transparent padding. No floor or shadow.",
+      "source": "/Users/apple/.codex/generated_images/01a1b663-e348-7043-91cf-22f7eeb3194c/exec-a1433d2a-19c5-4a84-bb55-152e5f5a1785.png",
+      "file": "assets/town/osmanthus.png"
+    },
+    {
+      "id": "lotus",
+      "prompt": "Use case: stylized-concept. Refined hand-painted Chinese Jiangnan wuxia Q-version RPG game asset, elevated three-quarter top-down camera, south-facing facade, blue grey tiled roofs, ivory plaster and warm timber, natural daylight, firm painterly edges. Genuine transparent PNG outside complete asset, no people, text, background gradient, large ground island or watermark. A compact low traditional round stone water basin containing two pink LOTUS FLOWERS and round green lotus leaves. Pretty Jiangnan town garden collectible game prop, full silhouette within square canvas with transparent padding. No surroundings, ground or shadow.",
+      "source": "/Users/apple/.codex/generated_images/01a1b663-e348-7043-91cf-22f7eeb3194c/exec-22dc737e-3e79-4310-a574-45b44e2b60f2.png",
+      "file": "assets/town/lotus.png"
+    }
+  ]
+}

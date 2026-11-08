@@ -1,0 +1,67 @@
+/* Run the real game input/update code with a small DOM test double. */
+const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
+const map=require('../village-map.js'),Gathering=require('../gathering.js'),HeroRun=require('../hero-run.js'),JianghuStory=require('../story.js');
+async function run(){
+  const elements=new Map(),events={},storage=new Map();let frame,now=0,context,battleReturn;
+  const drawing=new Proxy({}, {get:()=>()=>{}});
+  class Element {
+    constructor(id=''){this.id=id;this.hidden=id==='#inventory';this.children=[];this.dataset={};this.style={};this.tagName=id==='#game'?'CANVAS':'DIV';this.textContent='';this.classList={add(){},remove(){}};}
+    addEventListener(name,cb){this[name]=cb;}setAttribute(k,v){this[k]=v;}focus(){context.document.activeElement=this;}
+    append(el){this.children.push(el);}replaceChildren(...v){this.children=v;}getContext(){return drawing;}
+    getBoundingClientRect(){return {left:0,top:0,width:1280,height:800};}querySelector(){return null;}querySelectorAll(){return [];}
+  }
+  const element=id=>{if(!elements.has(id))elements.set(id,new Element(id));return elements.get(id);};
+  class Image {set src(value){this.complete=true;this.naturalWidth=100;this.naturalHeight=100;Promise.resolve().then(()=>this.onload?.());}}
+  context={console,Image,Gathering,HeroRun,JianghuStory,VillageMap:map,devicePixelRatio:1,Math,Map,Set,Promise,Date,Number,
+    localStorage:{getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,v)},
+    document:{activeElement:element('#game'),querySelector:element,createElement:()=>new Element(),createTextNode:text=>({textContent:text}),addEventListener(){}},
+    addEventListener:(key,cb)=>events[key]=cb,requestAnimationFrame:cb=>{frame=cb;return 1;},cancelAnimationFrame(){},
+    setTimeout:()=>1,clearTimeout(){},ResizeObserver:class{observe(){}},
+    SparringBattle:class{constructor(onReturn){this.active=false;battleReturn=onReturn;}},QSprites:{load:()=>Promise.resolve(),draw(){},drawImage(){}}
+  };
+  context.window=context;vm.createContext(context);
+  vm.runInContext(fs.readFileSync(require.resolve('../inventory.js'),'utf8'),context);
+  vm.runInContext(fs.readFileSync(require.resolve('../story-view.js'),'utf8'),context);
+  vm.runInContext(fs.readFileSync(require.resolve('../game.js'),'utf8'),context);
+  for(let i=0;i<15;i++)await Promise.resolve();assert.ok(frame,'Game initializes after all map pictures load');
+  const advance=count=>{for(let i=0;i<count;i++){now+=1000/60;frame(now);}};
+  const key=value=>events.keydown({key:value,preventDefault(){},repeat:false});
+  key('f');advance(120);assert.equal(storage.has('tingyu-keepsakes-v1'),false,'Opening story blocks map collection');
+  element('#story-enter').onclick();assert.equal(element('#story-opening').hidden,true);
+  advance(120);assert.equal(storage.has('tingyu-keepsakes-v1'),false,'Standing near flowers never auto-collects');
+  // Clicking the nearest flower likewise only selects/walks toward it.
+  element('#game').pointerdown({clientX:600*.8,clientY:(880-20)*.8});advance(120);
+  assert.equal(storage.has('tingyu-keepsakes-v1'),false,'Clicking and walking up to flowers never auto-collects');
+  key('f');
+  assert.equal(JSON.parse(storage.get('tingyu-keepsakes-v1')).counts.jasmine,1,'F immediately completes collection without waiting for any frame');
+  key('f');advance(90);assert.equal(JSON.parse(storage.get('tingyu-keepsakes-v1')).counts.jasmine,1,'Repeated F cannot bypass cooldown');
+  element('#game').pointerdown({clientX:616*.8,clientY:(952-20)*.8});advance(120);
+  key('f');assert.equal(new Gathering(context.localStorage).total,2,'The second collection also finishes instantly');
+  key('b');assert.equal(element('#inventory').hidden,false);assert.match(element('#bag-summary').textContent,/共 2 件/);
+  key('f');assert.equal(new Gathering(context.localStorage).total,2,'F without right click must never discard');
+  let prevented=false;element('#bag-grid').children[0].oncontextmenu({preventDefault(){prevented=true;}});
+  assert.ok(prevented);assert.equal(element('#discard-menu').hidden,false);
+  assert.equal(new Gathering(context.localStorage).total,2,'Right click only requests confirmation');
+  key('Escape');assert.equal(element('#discard-menu').hidden,true);assert.equal(element('#inventory').hidden,false,'Esc first cancels pending discard');
+  element('#bag-grid').children[0].oncontextmenu({preventDefault(){}});key('f');
+  assert.equal(new Gathering(context.localStorage).total,1,'Right click followed by F removes exactly one item');
+  assert.equal(element('#discard-menu').hidden,true);key('f');assert.equal(new Gathering(context.localStorage).total,1,'Holding or repeating F does not remove another item');
+  key('Escape');assert.equal(element('#inventory').hidden,true);
+  const reloaded=new Gathering(context.localStorage);assert.equal(reloaded.total,1,'Discarded inventory survives re-creation from saved data');
+  element('#quest').click();advance(1500);
+  assert.equal(element('#speaker-name').textContent,'老村长','Quest reaches the village chief at his new doorstep');
+  element('#close-dialogue').click();
+  const nearbyFlower=Gathering.nodes.find(n=>n.id==='guestFlowers');
+  element('#game').pointerdown({clientX:(map.elder.x+nearbyFlower.x)/2*.8,clientY:(map.elder.y+nearbyFlower.y)/2*.8});advance(180);
+  assert.equal(element('#interaction').hidden,false,'Conversation takes priority beside the chief');
+  assert.equal(element('#gather-prompt').hidden,true,'F prompt and E prompt are mutually exclusive when both actions are nearby');
+  key('e');assert.equal(element('#speaker-name').textContent,'老村长');
+  advance(500);element('#dialogue-next').click();advance(500);
+  const clue=element('#choices').children.find(b=>b.textContent.includes('旧镖牌'));assert.ok(clue,'Village chief offers a main-story clue');clue.click();advance(500);element('#dialogue-next').click();
+  assert.equal(new JianghuStory(context.localStorage).flags.chief,true,'Reading the chief clue advances the saved story');
+  assert.match(element('#quest-text').textContent,/武馆/);
+  battleReturn('yield');assert.equal(new JianghuStory(context.localStorage).flags.spar,false,'Yielding does not claim a completed spar');
+  battleReturn('defeat');assert.equal(new JianghuStory(context.localStorage).flags.spar,true,'Completing a battle advances the story even after defeat');
+  console.log('PASS real input/update: instant F collection, prompt priority, chief route/dialogue, cooldown and saved inventory');
+}
+module.exports=run();

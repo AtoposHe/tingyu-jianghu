@@ -1,0 +1,77 @@
+/* Layout uses four separate grid rows: heading / status / stage / actions.
+   Fighters and all effects are clipped to the stage, never behind the HUD. */
+.map-buttons{display:flex;gap:8px}
+.game-frame.in-battle{height:760px;min-height:760px}
+.in-battle> :not(#battle){visibility:hidden;pointer-events:none}
+.battle{position:absolute;inset:0;z-index:8;overflow:hidden;background:#efebdd;color:#35483f;display:grid;grid-template-rows:auto auto minmax(280px,1fr) auto}
+.battle-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:21px 4% 16px;background:linear-gradient(100deg,#f7f3e7,#e8e6d7)}
+.battle-heading small{font-size:10px;letter-spacing:3px;color:#8a9079}
+.battle-heading h2{margin:5px 0 0;font-size:24px;font-weight:500;letter-spacing:6px}
+.round-badge{text-align:center;font-size:12px;letter-spacing:3px}
+.round-badge strong{font-size:23px;font-weight:400;color:#967b4d}
+.round-badge>span{display:block;font-size:10px;letter-spacing:2px;margin-top:5px;color:#6d8066}
+.battle-heading>button{border:1px solid #bec5ad;border-radius:3px;background:#f5f1e2aa;padding:9px 11px;font-size:11px}
+.combatants{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:0 4% 16px;background:#efecdf;border-bottom:1px solid #c5cbb2;position:relative;z-index:1}
+.fighter-card{width:41%;max-width:450px;border:1px solid #b8c3a6;background:#f8f5e9;padding:12px 15px;border-radius:4px;box-shadow:0 3px 13px #4c614309}
+.enemy-card{background:#f4eddd;border-color:#c8bda1}
+.fighter-title{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.fighter-title>span{display:inline-grid;place-content:center;width:20px;height:20px;border:1px solid #9eaf8d;font-size:10px;background:#e1e8d0}
+.enemy-card .fighter-title>span{background:#e7dcc2;border-color:#c4ad87}
+.fighter-title strong{font-weight:500;letter-spacing:2px;font-size:16px}
+.fighter-title small{font-size:10px;color:#8e947d;margin-left:auto;white-space:nowrap}
+.stat{display:flex;align-items:center;gap:8px;margin-top:7px}
+.stat>span{font-size:10px;color:#7f8972;white-space:nowrap}
+.stat b{width:66px;text-align:right;font:11px/1.2 Georgia,serif;color:#64735e;white-space:nowrap}
+.meter{height:7px;background:#d9dbc6;flex:1;min-width:16px;border-radius:5px;overflow:hidden;box-shadow:inset 0 1px 2px #4c63411b}
+.meter i{display:block;width:100%;height:100%;border-radius:5px;transition:width .55s cubic-bezier(.16,.8,.25,1)}
+.hp i{background:linear-gradient(90deg,#6a8b62,#a1b875)}.mp i{background:linear-gradient(90deg,#5c909b,#9bbdb3)}
+.versus{font-size:15px;letter-spacing:6px;color:#87917a;white-space:nowrap}
+.battle-stage{position:relative;min-height:280px;overflow:hidden;background:#c8ceb3;isolation:isolate}
+.battle-stage>canvas{position:absolute;inset:0;width:100%;height:100%;cursor:default;aspect-ratio:auto;min-height:0}
+.battle-callout{position:absolute;left:15%;right:15%;top:14px;text-align:center;font-size:12px;letter-spacing:3px;color:#5b7160;pointer-events:none;text-shadow:0 1px 5px #fff8e1}
+.battle-callout:before,.battle-callout:after{content:'—';color:#a9af91;margin:0 12px}
+.skill-title{position:absolute;left:50%;top:8px;min-width:190px;transform:translate(-50%,-5px);display:flex;align-items:center;flex-direction:column;gap:4px;padding:5px 22px;opacity:0;pointer-events:none;transition:opacity .18s,transform .18s;background:linear-gradient(90deg,transparent,#294f40d9 25%,#294f40d9 75%,transparent);color:#f2d58b}
+.skill-title small{font-size:8px;letter-spacing:5px;color:#c1d6ad}.skill-title strong{font-size:25px;letter-spacing:8px;font-weight:500;line-height:1.1;text-shadow:0 1px 2px #20382d,0 0 12px #d6bc6666}.skill-title>span{font-size:8px;letter-spacing:2px;color:#d7d9b4}
+.skill-active .skill-title{opacity:1;transform:translate(-50%,0)}.skill-active .battle-callout{opacity:0}
+.stage-caption{position:absolute;bottom:9px;left:15px;font-size:9px;letter-spacing:3px;color:#7e8a70;pointer-events:none}
+.battle-dock{padding:13px 4% 12px;background:#f2eee1;border-top:1px solid #c4c9b0;display:grid;grid-template-columns:1fr 1fr;column-gap:25px;row-gap:10px;align-items:center}
+.battle-toolbar{grid-column:1/-1;display:flex;align-items:center;gap:18px;padding-bottom:10px;border-bottom:1px solid #d7d9c6;color:#818a73;font-size:10px}
+.battle-toolbar .q-mode-tag{margin-right:auto;letter-spacing:2px;color:#66795e}.battle-toolbar a{font-size:11px;color:#748567;text-decoration:none;white-space:nowrap}.battle-toolbar a:hover{color:#a0773b}
+.appearance-controls>span{letter-spacing:2px;color:#536e5c}.appearance-controls label{display:flex;align-items:center;gap:7px}
+.appearance-controls select{font:11px 'Songti SC',serif;color:#566c59;border:1px solid #c4cbb5;border-radius:3px;background:#f8f5e9;padding:5px 23px 5px 8px;cursor:pointer}
+.appearance-controls select:focus-visible{outline:2px solid #82977b;outline-offset:2px}
+.battle-log{min-width:0}.battle-log>small{font-size:10px;letter-spacing:2px;color:#939881}.battle-log>small span{color:#748367}
+.battle-log ol{list-style:none;padding:0;margin:9px 0 0;height:47px;overflow:auto;scrollbar-width:thin;scrollbar-color:#c1c8af transparent}
+.battle-log li{font-size:11px;line-height:1.9;color:#6e7c62}.battle-log li:first-child{color:#3e5946}
+.battle-actions{display:flex;gap:10px}.battle-actions>button{width:50%;display:flex;align-items:center;gap:10px;text-align:left;border-radius:4px;padding:12px 10px}
+.attack-button{background:#e1e8d1;border:1px solid #92aa7e;color:#3d5c42;box-shadow:inset 0 1px #f2f5e7}
+.battle-actions button strong{font-size:14px;font-weight:500;display:block;letter-spacing:2px;white-space:nowrap}
+.battle-actions button small{display:block;font-size:9px;color:#7c8d6c;white-space:nowrap;margin-top:6px}
+.action-icon{font-size:22px;padding-right:8px;border-right:1px solid #acba98;line-height:32px}
+.battle-actions kbd,.locked-mark{margin-left:auto;font-size:10px}
+.skill-button{background:#e4e4d7;border:1px solid #c8cbba;color:#939781}.skill-button .action-icon{border-color:#c7cbb8}.skill-button small{color:#999d8a!important}
+.locked-mark{border:1px solid #c9ccbb;padding:4px;border-radius:3px;color:#a4a894}
+.battle button:disabled{cursor:not-allowed;filter:saturate(.5);opacity:.62}
+.battle-tip{grid-column:1/-1;font-size:10px;color:#899178;letter-spacing:.5px;margin:0;text-align:center}
+.battle-result{position:absolute;inset:0;background:#34493c70;backdrop-filter:blur(4px);display:grid;place-items:center;padding:20px;z-index:10}
+.result-paper{width:min(440px,100%);padding:33px;text-align:center;background:#f4eedc;border:1px solid #d1c49f;box-shadow:0 20px 70px #1d322e40;border-radius:5px}
+.result-paper>small{font-size:10px;letter-spacing:4px;color:#9c987c}.result-paper h3{font-size:29px;font-weight:500;letter-spacing:5px;margin:21px 0;color:#617953}
+.result-paper p{font-size:13px;line-height:2;letter-spacing:1px;color:#7c826b}.result-actions{display:flex;justify-content:center;gap:10px;margin-top:24px}
+.result-actions button{border:1px solid #b6bfa2;background:#e5e8d2;padding:11px 14px;font-size:12px;border-radius:3px;white-space:nowrap}
+.result-actions button:last-child{background:#627a5e;color:#f6f0d9;border-color:#627a5e}.is-hit{animation:card-hit .45s ease-out}
+@keyframes card-hit{0%,45%{box-shadow:0 0 0 3px #bb62464a;background:#f4d4b8}100%{box-shadow:none}}
+@media(max-width:1000px){
+  .fighter-card{padding:10px;width:45%}.fighter-title strong{font-size:14px}.fighter-title small{display:none}.combatants{gap:8px}.versus{font-size:12px;letter-spacing:2px}
+  .battle-dock{grid-template-columns:1fr;gap:10px}.battle-log{display:flex;align-items:flex-start;gap:10px}.battle-log>small{padding-top:3px;white-space:nowrap;line-height:1.8}.battle-log>small>span{display:block}.battle-log ol{height:40px;margin:0;flex:1}
+  .battle-actions>button{justify-content:center;padding:10px 12px}.battle-actions button small{font-size:10px}.battle-actions kbd,.locked-mark{margin-left:10px}.battle-tip{font-size:9px;line-height:1.7}.battle-heading h2{font-size:22px}.stat{gap:5px}.stat b{width:58px}
+}
+@media(max-width:650px){
+  .game-frame.in-battle{height:710px;min-height:710px}.battle{grid-template-rows:auto auto minmax(300px,1fr) auto}.battle-heading{padding:16px 4% 14px}.battle-heading small{font-size:8px;letter-spacing:2px}.battle-heading h2{font-size:20px;letter-spacing:4px}.battle-heading>button{font-size:9px;padding:7px}.round-badge{font-size:10px;letter-spacing:1px}.round-badge strong{font-size:19px}.round-badge>span{font-size:9px}
+  .combatants{gap:8px;padding-bottom:14px}.fighter-card{padding:9px 7px;width:49%}.fighter-title{gap:5px;margin-bottom:9px}.fighter-title strong{font-size:12px;letter-spacing:1px}.fighter-title>span{width:17px;height:17px;font-size:9px}.versus{display:none}.stat{gap:4px;margin-top:7px}.stat>span{font-size:9px}.stat b{font-size:10px;width:56px}.meter{height:6px}
+  .battle-callout{font-size:11px;letter-spacing:1px;left:5%;right:5%}.battle-dock{padding:10px 4% 12px;gap:8px}.appearance-controls{gap:10px;padding-bottom:8px;font-size:9px}.appearance-controls>span{letter-spacing:1px}.appearance-controls label{gap:4px}.appearance-controls select{font-size:10px;padding:5px}
+  .battle-log li{font-size:10px;line-height:1.9}.battle-log>small{font-size:9px;letter-spacing:1px}.battle-actions{gap:8px}.battle-actions>button{padding:9px 7px;gap:8px}.battle-actions button strong{font-size:13px;letter-spacing:1px}.battle-actions button small{font-size:8px}.action-icon{font-size:21px;padding-right:7px}.battle-actions kbd{display:none}.locked-mark{margin-left:0;font-size:8px}.battle-tip{font-size:8px;letter-spacing:0;text-align:left}.result-paper{padding:25px 19px}.result-paper h3{font-size:25px;letter-spacing:3px}.result-paper p{font-size:12px}.result-actions button{font-size:11px}.map-buttons{gap:5px}
+}
+
+.portrait-link{margin-left:auto;text-decoration:none;color:#6b8167;font-size:10px;white-space:nowrap}.portrait-link:hover{color:#9b764f}@media(max-width:430px){.appearance-controls{flex-wrap:wrap;gap:7px}.portrait-link{margin-left:0;font-size:9px}.appearance-controls>span{display:none}}
+
+.appearance-note{font-size:9px;color:#8c967e;letter-spacing:0!important}.appearance-controls{flex-wrap:wrap}@media(max-width:650px){.appearance-note{display:none}}
