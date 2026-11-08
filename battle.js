@@ -63,7 +63,7 @@
       this.motion=null;this.floaters=[];this.wait=0;this.time=0;this.last=0;this.hitPause=0;
       this.root.hidden=false;this.root.closest('.game-frame').classList.add('in-battle');
       this.$('#battle-result').hidden=true;this.$('#combat-log').replaceChildren();
-      this.log(`切磋开始。${this.state.hero.realmName}对${this.state.enemy.realmName}，少侠按当前身体状况入场。每整回合结束双方各自回灵。`);
+      this.log(`切磋开始。${this.state.hero.realmName}对${this.state.enemy.realmName}，气血充盈入场。每整回合结束双方各自回灵。`);
       this.resize();this.sync();this.callout(this.state.hero.weaponId?'你的回合 · 以剑入江湖':'你的回合 · 以拳入江湖');
       this.$('#attack-button').focus({preventScroll:true});
       this.raf=requestAnimationFrame(t=>this.frame(t));
@@ -156,19 +156,20 @@
       this.busy=false;this.motion=null;this.wait=0;
       this.state.phase=kind;
       this.progression.recordBattle(kind,this.hadSkill);
-      this.equipment?.recordVitals(this.state.hero);
+      this.equipment?.finishBattle(this.state.hero,kind,this.opponentId);
+      this.state.hero.hp=this.state.hero.maxHp;
       this.$('#battle-result').hidden=false;
       const title=kind==='victory'?'切磋获胜':kind==='defeat'?'胜败乃兵家常事':'承让，下次再会';
       this.$('#result-title').textContent=title;
       this.$('#result-message').textContent=kind==='victory'
-        ?`经过 ${this.state.round} 回合，你凭修炼与${this.state.hero.weaponId?'剑掌':'拳掌'}赢得了武青山的认可。剩余气血 ${this.state.hero.hp}，灵力 ${this.state.hero.mp}。`
+        ?`经过 ${this.state.round} 回合，你凭修炼与${this.state.hero.weaponId?'剑掌':'拳掌'}赢得了武青山的认可。调息后气血已回满，剩余灵力 ${this.state.hero.mp}。`
         :kind==='defeat'?(this.progression.needsLesson
           ?`第 ${this.state.round} 回合，武青山及时收掌：“你的根基尚浅，只靠蛮力撑不了多久。我传你一式推山掌，再教你打坐吐纳。灵力须一点点积累。”返回后向他请教。`
           :`交手 ${this.state.round} 回合后，武青山扶你站稳：“掌势已会，根基仍有差距。沉肩护住中门，日常打坐勤积灵力，切莫急求速成。”`)
         :'你抱拳认输，武青山收势回礼：“先认真交手，再谈根基。准备好随时来。”';
       this.$('#battle-again').hidden=this.progression.needsLesson;
       this.$('#battle-return').textContent=this.progression.needsLesson?'向武师请教 ↗':'返回听雨村 ↗';
-      this.log(title+'。伤势与耗用灵力已保留；可服药或去竹林医馆调养。');this.callout('点到即止 · 以武会友');this.sync();
+      this.log(title+'。气血已自动回满；持续性伤病另行记录，按 C 查看。');this.callout('点到即止 · 以武会友');this.sync();
       this.$('#battle-return').focus({preventScroll:true});
     }
     yield() {if(this.active&&!this.busy&&this.state.phase==='player')this.finish('yield');}

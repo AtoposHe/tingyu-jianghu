@@ -1,0 +1,78 @@
+{
+  "tool": "built-in image_gen",
+  "assets": [
+    {
+      "id": "forestFloor",
+      "path": "assets/forest/floor-v2.png",
+      "prompt": "Use case: stylized-concept. Asset type: seamless overhead ground texture for a Chinese chibi wuxia RPG forest, bitmap game texture, square. A lush moss green forest floor made of overlapping subtle moss, tiny dark fern tips, earth and leaf litter. Rich hand-painted gouache and ink game art with soft natural shading and restrained detail. Entire view is evenly textured flat ground viewed from above, medium-dark jade green and deep olive. CRITICAL: no trees, no tall plants, no stones bigger than a leaf, no roads, no fences, no water, no buildings, no text, no icons. It must tile seamlessly on all four edges. The dark green ground will be overlaid with light sand paths and separate trees. Clearly readable calm texture, not a painting of a whole landscape. No large compositional elements.",
+      "transparent": false
+    },
+    {
+      "id": "ironOre",
+      "path": "assets/items/iron-ore.png",
+      "prompt": "Use case: stylized-concept. Asset type: standalone collectible iron ore deposit sprite for Chinese chibi wuxia 2D RPG. Reference concept: readable chunky fantasy mineral icon with bold dark painted outlines and rich facets. A compact low mound of angular deep slate-grey rocks with large glinting silver-blue metallic iron veins and white reflective facets; four or five irregular chunky rocks in one connected pile. Top down three-quarter view, entire rock cluster visible, clean complete silhouette, richly hand-painted guofeng cartoon game illustration, thick expressive dark ink outline, no square backing. Isolated on TRUE TRANSPARENT background, no grass, no landscape, no labels, no watermark. Large central object with 8% transparent padding, coherent soft upper-left light.",
+      "transparent": true
+    },
+    {
+      "id": "pathTexture",
+      "path": "assets/forest/path-v2.png",
+      "prompt": "Use case: stylized-concept. Square seamless overhead game texture of a compacted pale warm beige sand-and-gravel woodland footpath. Chinese hand-painted watercolor RPG style, warm cream and ochre dirt, small subtle smooth pebbles, very sparse tiny leaf fragments, calming evenly textured worn ground. No individual road shape: the entire square is the walkable path surface, same lightness everywhere. Not slabs, no grass, no large stones, no outlines, no trees, no objects, no text. Tileable on all four sides, bright against dark jade forest floor.",
+      "transparent": false
+    },
+    {
+      "id": "copperOre",
+      "path": "assets/items/copper-ore.png",
+      "prompt": "Use case: stylized-concept. Asset type: standalone collectible copper ore deposit sprite for Chinese chibi wuxia 2D RPG. A compact low mound of angular deep charcoal-brown rocks with thick rich orange copper seams and a few turquoise oxidised mineral patches. Four or five irregular chunky rocks in one connected pile. Rich metallic facets, distinct readable colors, bold dark ink contour like a polished fantasy inventory ore icon, hand-painted guofeng cartoon game illustration. Top down three-quarter view, entire cluster complete, not a rectangular block. Isolated on TRUE TRANSPARENT background, no grass, no landscape, no text, no watermark. Large centered object with 8% transparent padding, coherent soft upper-left light.",
+      "transparent": true
+    },
+    {
+      "id": "salve",
+      "path": "assets/items/jiegu-gao.png",
+      "prompt": "Use case: stylized-concept. Single polished Chinese chibi wuxia RPG inventory item icon, richly hand-painted gouache illustration with strong dark ink contour, three-quarter elevated view, centered complete object occupying 80% of square, clean readable silhouette at 64px, subtle upper-left lighting. TRUE TRANSPARENT background, no text, no writing, no watermark, no square backing, no scenery. A low round dark wooden ointment pot with its circular lid leaning behind it, pale creamy green medicinal balm inside, small bamboo spatula resting across the rim, rolled linen cloth bandage and a short thin bamboo splint beside the pot. Forest green and warm brown, clearly a traditional bone-setting salve item.",
+      "transparent": true
+    },
+    {
+      "id": "bandage",
+      "path": "assets/items/zhixue-san.png",
+      "prompt": "Use case: stylized-concept. Single polished Chinese chibi wuxia RPG inventory item icon, richly hand-painted gouache illustration with strong dark ink contour, three-quarter elevated view, centered complete object occupying 80% of square, clean readable silhouette at 64px, subtle upper-left lighting. TRUE TRANSPARENT background, no text, no writing, no watermark, no square backing, no scenery. A cream folded herbal powder paper packet, tied in crossed red twine with a tiny carved red wooden seal, slightly open corner showing fine red-brown medicinal powder and two small fresh herb leaves, one small rolled cloth bandage beside it. Warm ivory and vermilion.",
+      "transparent": true
+    },
+    {
+      "id": "spirit",
+      "path": "assets/items/huiqi-wan.png",
+      "prompt": "Use case: stylized-concept. Single polished Chinese chibi wuxia RPG inventory item icon, richly hand-painted gouache illustration with strong dark ink contour, three-quarter elevated view, centered complete object occupying 80% of square, clean readable silhouette at 64px, subtle upper-left lighting. TRUE TRANSPARENT background, no text, no writing, no watermark, no square backing, no scenery. A small elegant rounded jade turquoise ceramic medicine flask with a narrow neck and cream cloth tied by a dark teal cord, three glossy pale cyan herbal pills arranged beside its base, very subtle mist of cyan spirit. Clear potion silhouette, jade and teal colors.",
+      "transparent": true
+    },
+    {
+      "id": "antidote",
+      "path": "assets/items/jiedu-dan.png",
+      "prompt": "Use case: stylized-concept. Single polished Chinese chibi wuxia RPG inventory item icon, richly hand-painted gouache illustration with strong dark ink contour, three-quarter elevated view, centered complete object occupying 80% of square, clean readable silhouette at 64px, subtle upper-left lighting. TRUE TRANSPARENT background, no text, no writing, no watermark, no square backing, no scenery. A small plum-purple ceramic medicine gourd bottle tied with a pale straw cord and a tiny green leaf charm, cork leaning against it, three emerald green antidote pills beside its base. A few tiny silver ornament strokes but no writing. Distinct rounded double-bulb gourd silhouette.",
+      "transparent": true
+    },
+    {
+      "id": "stomach",
+      "path": "assets/items/hewei-san.png",
+      "prompt": "Use case: stylized-concept. Single polished Chinese chibi wuxia RPG inventory item icon, richly hand-painted gouache illustration with strong dark ink contour, three-quarter elevated view, centered complete object occupying 80% of square, clean readable silhouette at 64px, subtle upper-left lighting. TRUE TRANSPARENT background, no text, no writing, no watermark, no square backing, no scenery. A soft ochre-yellow cloth herbal sachet tied with a dark brown cord and a carved amber bead, a few pale sliced dried ginger roots and small tan medicinal pellets spilling beside it. No writing, friendly warm golden colors, visibly a soft medicine pouch with a pinched top.",
+      "transparent": true
+    },
+    {
+      "id": "fence",
+      "path": "assets/forest/fence-v2.png",
+      "prompt": "Use case: stylized-concept. Standalone short straight horizontal wooden rail fence segment for a Chinese hand-painted 2D wuxia RPG, isometric very slightly elevated FRONT view. Exactly three sturdy weathered warm brown wooden fence posts with two long horizontal cross rails between them, decorative straw ties at joints. Whole fence visible, feet of all posts on the exact same horizontal baseline; no receding perspective, no diagonal segment. Landscape wide 4:1 composition, full complete simple readable silhouette with dark ink outlines and gouache grain. TRUE TRANSPARENT background, no ground, no vegetation, no text, no watermark. The fence is solid and visibly blocks walking.",
+      "transparent": true
+    },
+    {
+      "id": "boulder",
+      "path": "assets/forest/boulder-v2.png",
+      "prompt": "Use case: stylized-concept. Standalone non-collectible scenery rock for a Chinese hand-painted chibi wuxia RPG. A large rounded moss-covered dull olive grey stone boulder with tiny fern at base, very smooth worn rounded surfaces, no mineral veins, no crystals, no sparkling, no metal. Three-quarter overhead view. Complete object with 8% transparent padding, hand-painted gouache and ink game asset with soft muted colors. TRUE TRANSPARENT background, no landscape, no text, no watermark. Clearly scenery not a collectible ore.",
+      "transparent": true
+    },
+    {
+      "id": "bridge",
+      "path": "assets/forest/bridge-v2.png",
+      "prompt": "Use case: stylized-concept. A small rustic straight wooden footbridge crossing LEFT to RIGHT horizontally, elevated overhead three-quarter 2D RPG view, Chinese guofeng hand-painted gouache. Landscape 2:1 composition, with clearly open flat wooden plank deck and two short wooden handrails along its top and bottom edges, chunky dark posts and rope ties, no stairs, deck ends at left and right. Full complete bridge including both ends. Deck is visually clear and walkable, warm honey brown timber, dark ink outline. TRUE TRANSPARENT background, no ground, no water, no plants, no landscape, no text, no watermark. Simple readable shape fitting a horizontal rectangle.",
+      "transparent": true
+    }
+  ],
+  "notes": "Original generated PNGs copied to project; map paths use the same geometry for PNG texture painting and collision. Body silhouette is native Canvas UI."
+}

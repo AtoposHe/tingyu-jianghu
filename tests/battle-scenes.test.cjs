@@ -50,6 +50,7 @@ async function run(){
   assert.equal(b.motion.profile.id,'slash');assert.equal(b.state.hero.weaponId,'qingfeng');b.hit();assert.equal(b.state.enemy.hp,348);
   assert.equal(el('#attack-label').textContent,'基础劈砍');assert.match(el('#attack-hint').textContent,/青锋剑/);
   b.start('trainer');await flush();b.attack();b.last=1000;b.hitPause=.022;b.draw=()=>{};b.frame(1100);assert.ok(Math.abs(b.motion.t-.078)<1e-9,'Slow frames consume only the 22ms hit stop, not an entire frame or artificial slow motion');
+  b.state.hero.hp=0;b.state.hero.mp=4;b.finish('defeat');assert.equal(b.state.hero.hp,b.state.hero.maxHp,'Real battle conclusion restores HP immediately');assert.equal(b.equipment.heroProfile(b.progression.hero).currentHp,b.progression.hero.maxHp);assert.equal(b.equipment.condition(b.progression.hero).symptoms[0].id,'bruise','A light sparring bruise is recorded separately from HP');b.start();assert.equal(b.state.hero.hp,b.state.hero.maxHp);assert.equal(b.state.hero.mp,4);
   console.log('PASS opponent scenes, async race protection, rematch, learned hero skill animation, impact cost/guard and insufficient-spirit input');
 }
 module.exports=run();

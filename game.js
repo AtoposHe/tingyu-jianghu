@@ -29,11 +29,11 @@
   const battle = new SparringBattle((result,hadSkill) => {
     martial.recordBattle(result,hadSkill);
     if(hadSkill&&['victory','defeat'].includes(result))markStory('practice');
-    cultivation.render();
+    syncEquipment();
     keys.clear();heroRun.reset();footDust.length=0;lastTime=0;canvas.focus({preventScroll:true});
     if(martial.needsLesson){openDialogue(trainer);showNode('trainerLesson');}
     else if(martial.practiced&&!economy.commission){openDialogue(trainer);showNode('trainerGift');}
-    else announce('切磋结束。余伤已保留，可按 C 查看身体，服药或去竹林医馆调养。');
+    else announce('切磋结束，气血已回满。按 C 查看伤病，必要时可服药或找顾大夫。');
   },martial,economy);
 
   const walkable=(x,y)=>worldMap.walkable(x,y);
@@ -66,7 +66,7 @@
   $('#outskirts-toggle').onclick=()=>requestTravel(worldMap===VillageMap?'forest':'village');
   $('#find-doctor').onclick=()=>requestTalk(doctorNpc);
   function forestNodes(){return [...ForestMap.mines.map(n=>({...n,kind:'ore'})),...forestResources.nodes()];}
-  function resourceNear(n){return Math.hypot(hero.x-n.x,hero.y-n.y)<70&&worldMap.canStep(hero,n);}
+  function resourceNear(n){return Math.hypot(hero.x-n.x,hero.y-n.y)<90&&worldMap.canStep(hero,n.approach||n);}
   function nearestResource(){return chosenResource&&resourceNear(chosenResource)?chosenResource:forestNodes().filter(resourceNear).sort((a,b)=>Math.hypot(a.x-hero.x,a.y-hero.y)-Math.hypot(b.x-hero.x,b.y-hero.y))[0];}
   function collectForest(){if(closestNpc())return;const n=nearestResource();if(!n)return announce('沿林径走近矿脉或药草，再按 F 采集。');stopExploring();const ok=n.kind==='ore'?economy.mine(n.id):forestResources.collect(n.id);if(ok){syncEquipment();announce(`获得${n.kind==='ore'?Forge.ores[n.ore].name:Forge.herbs[n.herb].name} ×1 · 已放入行囊`);}else announce('矿脉尚未恢复，稍后再来。');syncFlower();}
   // Older story saves cannot bypass the new lesson; new cultivation progress restores its goals.
@@ -144,7 +144,7 @@
           } else if(id==='acceptSword'){economy.acceptCommission();syncEquipment();showNode('trainerGiftAccepted');}
           else if(id==='findSmith'){closeDialogue();requestTalk(smith);}
           else if(id==='learnMartial') {
-            if(martial.learn()){economy.hpMissing=0;economy.mpMissing=0;economy.save();markStory('spar');cultivation.render();bag.render();announce('习得推山掌与吐纳法 · 战斗按 2 施掌，地图按 R 修炼');}
+            if(martial.learn()){economy.hpMissing=0;economy.mpMissing=0;economy.ailments=economy.ailments.filter(a=>a.id!=='bruise');economy.save();markStory('spar');cultivation.render();bag.render();announce('习得推山掌与吐纳法 · 战斗按 2 施掌，地图按 R 修炼');}
             showNode('trainerLearned');
           } else if(id==='openCultivation'){closeDialogue();cultivation.open();}
           else showNode(id);
@@ -192,7 +192,7 @@
     if(currentNode.choices) return;
     if(currentNode.next) showNode(currentNode.next); else closeDialogue();
   }
-  const nearNpc=(person)=>Math.hypot(hero.x-person.x,hero.y-person.y)<78&&Math.abs(worldMap.surfaceAt(hero.x,hero.y).height-worldMap.surfaceAt(person.x,person.y).height)<2;
+  const nearNpc=(person)=>Math.hypot(hero.x-person.x,hero.y-person.y)<(person.interactionRange||78)&&Math.abs(worldMap.surfaceAt(hero.x,hero.y).height-worldMap.surfaceAt(person.x,person.y).height)<2;
   const closestNpc=()=>villagers().filter(nearNpc).sort((a,b)=>Math.hypot(hero.x-a.x,hero.y-a.y)-Math.hypot(hero.x-b.x,hero.y-b.y))[0];
   function requestTalk(person=npc) {
     const targetMap=person===doctorNpc?ForestMap:VillageMap;if(worldMap!==targetMap){requestTravel(targetMap===ForestMap?'forest':'village',()=>requestTalk(person));return;}
@@ -215,7 +215,7 @@
     else if(chronicle.next==='flowers'){
       if(worldMap!==VillageMap){requestTravel('village');return;}
       const node=Gathering.nodes.filter(n=>!keepsakes.remaining(n)).sort((a,b)=>Math.hypot(a.x-hero.x,a.y-hero.y)-Math.hypot(b.x-hero.x,b.y-hero.y))[0];
-      if(node){chosenFlower=node;keys.clear();pendingTalk=false;path=flowerNear(node)?[]:findPath(hero,node);destination=path[path.length-1]||null;announce('走近花草后按 F 收集，再按 B 查看行囊。');}
+      if(node){chosenFlower=node;keys.clear();pendingTalk=false;path=flowerNear(node)?[]:findPath(hero,node.approach||node);destination=path[path.length-1]||null;announce('走近花草后按 F 收集，再按 B 查看行囊。');}
     }else storyView.open();
   });
   $('#dialogue-next').addEventListener('click',advance);
@@ -268,7 +268,7 @@
     const p={x:(e.clientX-rect.left)/camera.scale+camera.x,y:(e.clientY-rect.top)/camera.scale+camera.y};
     const clicked=villagers().find(person=>Math.hypot(p.x-person.x,p.y-(person.y-25))<47);
     if(clicked) {requestTalk(clicked);return;}
-    if(worldMap===ForestMap){const node=forestNodes().find(n=>Math.hypot(p.x-n.x,p.y-(n.y-15))<35);if(node){chosenResource=node;pendingTalk=false;pendingTravel=null;path=resourceNear(node)?[]:findPath(hero,node);destination=path[path.length-1]||null;return;}}
+    if(worldMap===ForestMap){const node=forestNodes().find(n=>Math.abs(p.x-n.x)<(n.kind==='ore'?54:35)&&p.y>n.y-(n.kind==='ore'?85:68)&&p.y<n.y+18);if(node){chosenResource=node;pendingTalk=false;pendingTravel=null;path=resourceNear(node)?[]:findPath(hero,node.approach||node);destination=path[path.length-1]||null;return;}}
     const flower=(worldMap===VillageMap?Gathering.nodes:[]).find(n=>Math.hypot(p.x-n.x,p.y-(n.y-20))<35);
     if(flower){chosenFlower=flower;pendingTalk=false;path=flowerNear(flower)?[]:findPath(hero,flower);destination=path[path.length-1]||null;if(!path.length&&!flowerNear(flower))announce('请沿道路走近这处花草。');return;}
     pendingTalk=false;pendingTravel=null;
@@ -387,7 +387,7 @@
     const dpr=Math.min(window.devicePixelRatio||1,2);
     ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,canvas.width/dpr,canvas.height/dpr);
     ctx.scale(camera.scale,camera.scale);ctx.translate(-camera.x,-camera.y);
-    ctx.drawImage(worldMap===VillageMap?images.terrain:images.forestTerrain,0,0,WORLD.width,WORLD.height);
+    if(worldMap===VillageMap)ctx.drawImage(images.terrain,0,0,WORLD.width,WORLD.height);else ForestMap.drawGround(ctx,images);
     if(destination) {
       ctx.strokeStyle='#617b5b66';ctx.lineWidth=1.5;ctx.setLineDash([3,7]);
       ctx.beginPath();ctx.moveTo(hero.x,hero.y);for(const p of path)ctx.lineTo(p.x,p.y);ctx.stroke();ctx.setLineDash([]);
@@ -403,12 +403,15 @@
     const actors=[{y:hero.y,draw:()=>character(images.hero,hero.x,hero.y,true)},...villagers().map(person=>({y:person.y,draw:()=>character(images[person.id==='elder'?'npc':person.id],person.x,person.y,false,person)}))];
     const resourceNodes=worldMap===VillageMap?Gathering.nodes:forestNodes();
     for(const node of resourceNodes)actors.push({y:node.y,draw:()=>{
-      const town=worldMap===VillageMap,ready=town?!keepsakes.remaining(node):node.kind==='ore'?!economy.remaining(node.id):true,near=town?flowerNear(node):resourceNear(node),size=town?(node.item==='lotus'?66:55):node.kind==='herb'?52:42;
-      ctx.save();ctx.globalAlpha=ready?1:.4;
-      if(!town&&node.kind==='ore'){ctx.fillStyle=Forge.ores[node.ore].color;ctx.strokeStyle='#e5dbc0';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(node.x-17,node.y-9);ctx.lineTo(node.x-9,node.y-27);ctx.lineTo(node.x+12,node.y-30);ctx.lineTo(node.x+22,node.y-11);ctx.lineTo(node.x+10,node.y);ctx.lineTo(node.x-12,node.y+2);ctx.closePath();ctx.fill();ctx.stroke();ctx.fillStyle=node.ore==='iron'?'#b5c0b7':'#d6ad77';ctx.beginPath();ctx.moveTo(node.x-9,node.y-27);ctx.lineTo(node.x+12,node.y-30);ctx.lineTo(node.x+5,node.y-12);ctx.lineTo(node.x-17,node.y-9);ctx.closePath();ctx.fill();ctx.strokeStyle=node.ore==='iron'?'#526c71':'#8b5f40';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(node.x+5,node.y-12);ctx.lineTo(node.x+10,node.y);ctx.moveTo(node.x+5,node.y-12);ctx.lineTo(node.x+22,node.y-11);ctx.stroke();}
-      else ctx.drawImage(images[town?node.item:node.herb],node.x-size/2,node.y-size,size,size);ctx.restore();
-      if(ready){ctx.fillStyle='#f8dda6';ctx.beginPath();ctx.arc(node.x+17,node.y-34+Math.sin(elapsed*2+node.x)*2,2,0,Math.PI*2);ctx.fill();}
-      if(near||(town?chosenFlower?.id===node.id:chosenResource?.id===node.id)){ctx.font='12px "Songti SC",serif';ctx.textAlign='center';ctx.lineWidth=3;ctx.strokeStyle='#334329';ctx.fillStyle='#fff1cd';const label=town?Gathering.items[node.item].name:node.kind==='ore'?Forge.ores[node.ore].name:Forge.herbs[node.herb].name;ctx.strokeText(label,node.x,node.y-size-7);ctx.fillText(label,node.x,node.y-size-7);}
+      const town=worldMap===VillageMap,ready=town?!keepsakes.remaining(node):node.kind==='ore'?!economy.remaining(node.id):true,near=town?flowerNear(node):resourceNear(node),size=town?(node.item==='lotus'?66:55):node.kind==='herb'?64:100;
+      if(!town){ctx.save();ctx.fillStyle=ready?'#f8e4a438':'#777a6444';ctx.strokeStyle=ready?'#ffe9a9':'#9eaa84';ctx.lineWidth=near?3:1.5;ctx.beginPath();ctx.ellipse(node.x,node.y+3,node.kind==='ore'?49:31,node.kind==='ore'?15:10,0,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.restore();}
+      ctx.save();ctx.globalAlpha=ready?1:.5;
+      const art=town?node.item:node.kind==='ore'?(ready?node.ore+'Ore':'boulder'):node.herb;
+      ctx.drawImage(images[art],node.x-size/2,node.y-size*(node.kind==='ore'?.8:1),size,size*(node.kind==='ore'?.8:1));ctx.restore();
+      if(!town){ctx.save();ctx.fillStyle=ready?'#ffe6a0':'#b6bda4';ctx.strokeStyle='#536146';ctx.lineWidth=2;const y=node.y+12;ctx.beginPath();ctx.moveTo(node.x,y-7);ctx.lineTo(node.x+6,y);ctx.lineTo(node.x,y+7);ctx.lineTo(node.x-6,y);ctx.closePath();ctx.fill();ctx.stroke();ctx.restore();}
+      if(ready){ctx.fillStyle='#ffefb1';ctx.beginPath();ctx.arc(node.x+size*.28,node.y-size*.65+Math.sin(elapsed*2+node.x)*2,2.5,0,Math.PI*2);ctx.fill();}
+      if(!town||near||chosenFlower?.id===node.id){ctx.font='12px "Songti SC",serif';ctx.textAlign='center';ctx.lineWidth=4;ctx.strokeStyle='#344932';ctx.fillStyle=ready?'#fff6d1':'#d0d8bc';let label=town?Gathering.items[node.item].name:node.kind==='ore'?Forge.ores[node.ore].name:Forge.herbs[node.herb].name;if(!town)label=(ready?'可采 · ':'休养 · ')+label;ctx.strokeText(label,node.x,node.y-size*(node.kind==='ore'?.8:1)-9);ctx.fillText(label,node.x,node.y-size*(node.kind==='ore'?.8:1)-9);}
+
     }});
     for(const prop of worldMap.props)actors.push({y:prop.depth,draw:()=>{
       ctx.save();ctx.globalAlpha=propOpacity.get(prop.id)??1;

@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="battle.css?v=35f61060bdd1">
   <link rel="stylesheet" href="map-ui.css?v=7aeaa9b37c58">
   <link rel="stylesheet" href="inventory.css?v=2447b55187ff">
-  <link rel="stylesheet" href="health.css?v=adb7d63f0c91">
+  <link rel="stylesheet" href="health.css?v=ee617abf4096">
   <link rel="stylesheet" href="smithy.css?v=929451462991">
   <link rel="stylesheet" href="cultivation.css?v=65242c907f69">
   <link rel="stylesheet" href="story.css?v=f303fef5de98">
@@ -71,10 +71,17 @@
     <div class="smithy-welcome"><div class="smithy-portrait"><img src="assets/q/blacksmith.png" alt="铁师傅，束布巾、着皮围裙，手持铁锤的国风Q版铁匠"><strong>铁师傅 · 铁匠</strong><span id="smithy-realm">淬体六段</span></div><div><p id="smithy-greeting"></p><button id="smithy-claim" type="button">凭条领取青锋剑 · 免费</button><p id="smithy-materials"></p><button id="smithy-mine" type="button">南行听雨林采矿 ↗</button></div><div class="smithy-furnace" aria-hidden="true">火</div></div>
     <div id="forge-order" class="forge-order" hidden><p id="forge-order-text"></p><button id="forge-confirm" type="button">确认交付</button><button id="forge-cancel" type="button">取消</button></div><p id="smithy-feedback" class="smithy-feedback" role="status" aria-live="polite"></p>
     <section><h3>现货兵器 <small>金币购买 · 获得后在行囊装备</small></h3><div id="smithy-goods" class="smithy-goods"></div></section><section><h3>矿石锻造 <small>交付矿石与工钱 · 每次打造一把</small></h3><div id="smithy-recipes" class="smithy-recipes"></div></section><section class="smithy-sell"><h3>余矿回收 <small>出售多余矿石，换取盘缠</small></h3><div id="smithy-sell"></div></section></div></section>
-  <section id="doctor" class="care-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="doctor-title"><div class="care-paper"><header><div><small>听雨林 · 青竹深处</small><h2 id="doctor-title">杏竹医馆</h2></div><span class="care-gold">金币 <strong id="doctor-gold"></strong></span><button id="doctor-close" type="button" aria-label="离开医馆">×</button></header><div class="doctor-welcome"><div><img src="assets/q/doctor.png" alt="顾大夫，青衣布帽、手持药囊与竹简的医生"><strong>顾大夫 · 医生</strong><span id="doctor-realm"></span></div><div><p>行走江湖，莫把伤势当作小事。先调养气血，再问剑锋。</p><p id="doctor-condition"></p><button id="doctor-treat" type="button">治疗并调养</button></div></div><p id="doctor-feedback" class="care-feedback" role="status" aria-live="polite"></p><h3>常备药品 <small>买入后可在行囊服用</small></h3><div id="doctor-goods" class="doctor-goods"></div><h3>收购药草</h3><div id="doctor-herbs" class="doctor-herbs"></div></div></section>
-  <section id="health" class="care-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="health-title"><div class="care-paper health-paper"><header><div><small>少侠档案 · 身体状况</small><h2 id="health-title">观身知己</h2></div><button id="health-close" type="button" aria-label="关闭身体状况">×</button></header><div class="health-summary"><img src="assets/q/hero-idle.png" alt="少侠立绘"><div><h3 id="health-name"></h3><p id="health-realm"></p><strong id="health-status"></strong></div></div><div class="health-stat"><span>气血</span><b id="health-hp"></b><div class="meter hp"><i id="health-hp-bar"></i></div></div><div class="health-stat"><span>灵力</span><b id="health-mp"></b><div class="meter mp"><i id="health-mp-bar"></i></div></div><p id="health-info"></p><p id="health-description"></p><label for="hero-name-input">名字 <small>1—10 字</small></label><div class="hero-name-editor"><input id="hero-name-input" maxlength="10" autocomplete="off"><button id="hero-name-save" type="button">保存名字</button></div><p id="health-feedback" class="care-feedback" role="status" aria-live="polite"></p></div></section>
+  <section id="doctor" class="care-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="doctor-title"><div class="care-paper"><header><div><small>听雨林 · 青竹深处</small><h2 id="doctor-title">杏竹医馆</h2></div><span class="care-gold">金币 <strong id="doctor-gold"></strong></span><button id="doctor-close" type="button" aria-label="离开医馆">×</button></header><div class="doctor-welcome"><div><img src="assets/q/doctor.png" alt="顾大夫，青衣布帽、手持药囊与竹简的医生"><strong>顾大夫 · 医生</strong><span id="doctor-realm"></span></div><div><p>气血可在战后调息恢复，中毒、骨折或腹痛需对症诊治。先看伤病，再议用药。</p><p id="doctor-condition"></p><button id="doctor-treat" type="button">治疗并调养</button></div></div><p id="doctor-feedback" class="care-feedback" role="status" aria-live="polite"></p><h3>常备药品 <small>按症用药 · 买入后在行囊使用</small></h3><div id="doctor-goods" class="doctor-goods"></div><h3>收购药草</h3><div id="doctor-herbs" class="doctor-herbs"></div></div></section>
+  <section id="health" class="care-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="health-title">
+    <div class="care-paper health-paper"><header><div><small>少侠档案 · 身体状况</small><h2 id="health-title">观身知己</h2></div><button id="health-close" type="button" aria-label="关闭身体状况">×</button></header>
+      <div class="health-summary"><div><h3 id="health-name"></h3><p id="health-realm"></p></div><strong id="health-status"></strong></div>
+      <div class="body-examination"><div class="body-chart"><span class="body-caption">身体部位 · 正面</span><canvas id="body-diagram" width="270" height="440" role="img" aria-label="身体部位示意图"></canvas><p><i></i>红色部位表示持续性伤病</p></div><div class="symptom-panel"><h3>当前症状 <small id="symptom-count"></small></h3><div id="health-symptoms" class="health-symptoms"></div><p id="health-description"></p></div></div>
+      <div class="health-vitals"><div class="health-stat"><span>气血</span><b id="health-hp"></b><div class="meter hp"><i id="health-hp-bar"></i></div></div><div class="health-stat"><span>灵力</span><b id="health-mp"></b><div class="meter mp"><i id="health-mp-bar"></i></div></div></div><p id="health-info"></p>
+      <label for="hero-name-input">名字 <small>1—10 字</small></label><div class="hero-name-editor"><input id="hero-name-input" maxlength="10" autocomplete="off"><button id="hero-name-save" type="button">保存名字</button></div><p id="health-feedback" class="care-feedback" role="status" aria-live="polite"></p>
+    </div>
+  </section>
   <script src="manuals.js?v=c6a54bf7ae6a"></script>
-  <script src="forge.js?v=01e3bf16a0ad"></script>
+  <script src="forge.js?v=a3310ad9b8e9"></script>
   <script src="smithy.js?v=b089a1d1e9bb"></script>
   <script src="martial.js?v=89e9388e4f31"></script>
   <script src="cultivation.js?v=1d406b2e1b43"></script>
@@ -88,16 +95,16 @@
   <script src="hero-run.js?v=68e877566130"></script>
   <script src="battle-fx.js?v=576c2b19f755"></script>
   <script src="battle-scenes.js?v=ff601210da5a"></script>
-  <script src="battle.js?v=30799d275e68"></script>
+  <script src="battle.js?v=4935facb1174"></script>
   <script src="village-map.js?v=96ec6fc556aa"></script>
   <script src="navigation.js?v=652f51b593dc"></script>
-  <script src="forest-map.js?v=47e7e5b9213b"></script>
+  <script src="forest-map.js?v=97bcb796fc7f"></script>
   <script src="forest-resources.js?v=ac426d5c708b"></script>
-  <script src="health.js?v=07f96e68fb25"></script>
+  <script src="health.js?v=93075035de91"></script>
   <script src="gathering.js?v=d74dd4d7166d"></script>
-  <script src="inventory.js?v=01b6cb65537e"></script>
+  <script src="inventory.js?v=693659c439c8"></script>
   <script src="story.js?v=06ce43c95999"></script>
   <script src="story-view.js?v=bc3894be0da5"></script>
-  <script src="game.js?v=666c7eb11aaa"></script>
+  <script src="game.js?v=26fc29d8374f"></script>
 </body>
 </html>

@@ -41,7 +41,7 @@
       if(kind==='weapon'&&this.economy&&Object.hasOwn(Forge.weapons,key)){const weapon=Forge.weapons[key];return {...weapon,count:this.economy.weapons[key],weapon,kind:`兵器 · 武力 +${weapon.attack}`};}
       const item=Gathering.items[id];return item?{...item,count:this.store.counts[id],src:`assets/town/${item.art}.png`}:null;
     }
-    icon(item){return item.src?`<img src="${item.src}" alt="${item.name}">`:item.medicine?'<span class="medicine-icon">药</span>':`<span class="ore-icon ${item.ore}">矿</span>`;}
+    icon(item){return item.src?`<img src="${item.src}" alt="${item.name}">`:`<span class="item-fallback">${item.name}</span>`;}
     renderBooks(){
       const ids=this.progression?.manualIds||[],grid=document.querySelector('#manual-grid');grid.replaceChildren();
       document.querySelector('#manual-empty').hidden=ids.length>0;
@@ -88,7 +88,7 @@
       const detail=document.querySelector('#bag-detail'),item=this.item(this.selected);
       detail.innerHTML=item?`${this.icon(item)}<h3>${item.name}</h3><p>${item.kind} · 拥有 ${item.count} 件</p><p>${item.description}</p>`:'<h3>行囊待满</h3><p>收集花卉、到村外采矿，或向铁师傅领取武师赠剑。</p>';
       if(item?.weapon){const button=document.createElement('button');button.type='button';button.className='equip-button';const equipped=this.economy.equippedId===item.weapon.id;button.textContent=equipped?'卸下武器 · 恢复徒手':'装备'+item.name;button.onclick=()=>{this.economy.equip(equipped?null:item.weapon.id);this.onGearChange();this.render();};detail.append(button);}
-      if(item?.medicine){const button=document.createElement('button');button.type='button';button.className='equip-button';button.textContent='服用'+item.name;button.onclick=()=>{const result=this.economy.useMedicine(item.medicine.id,this.progression.hero);if(result.ok)this.onGearChange();this.render();document.querySelector('#bag-feedback').textContent=result.message;};detail.append(button);}
+      if(item?.medicine){const button=document.createElement('button');button.type='button';button.className='equip-button';button.textContent='使用'+item.name;button.onclick=()=>{const result=this.economy.useMedicine(item.medicine.id,this.progression.hero);if(result.ok)this.onGearChange();this.render();document.querySelector('#bag-feedback').textContent=result.message;};detail.append(button);}
       document.querySelector('#bag-save').textContent=this.store.saved?'花卉收藏自动保存在当前浏览器。':'当前浏览器无法保存，收藏将在关闭页面后丢失。';
       document.querySelector('#discard-menu').hidden=!this.pendingDiscard;
       if(this.pendingDiscard)document.querySelector('#discard-name').textContent=`丢弃 ${this.item(this.pendingDiscard).name} ×1？`;
