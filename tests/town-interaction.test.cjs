@@ -1,18 +1,18 @@
 /* Run the real game input/update code with a small DOM test double. */
 const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
-const map=require('../village-map.js'),Gathering=require('../gathering.js'),HeroRun=require('../hero-run.js'),JianghuStory=require('../story.js'),Martial=require('../martial.js');
+const map=require('../village-map.js'),Gathering=require('../gathering.js'),HeroRun=require('../hero-run.js'),JianghuStory=require('../story.js'),Martial=require('../martial.js'),Manuals=require('../manuals.js');
 async function run(){
   const elements=new Map(),events={},storage=new Map();let frame,now=0,context,battleReturn;
   const drawing=new Proxy({}, {get:()=>()=>{}});
   class Element {
     constructor(id=''){this.id=id;this.hidden=['#inventory','#cultivation'].includes(id);this.children=[];this.dataset={};this.style={};this.tagName=id==='#game'?'CANVAS':'DIV';this.textContent='';this.classList={add(){},remove(){},toggle(){}};}
     addEventListener(name,cb){this[name]=cb;}setAttribute(k,v){this[k]=v;}focus(){context.document.activeElement=this;}
-    append(el){this.children.push(el);}replaceChildren(...v){this.children=v;}getContext(){return drawing;}
+    append(...els){this.children.push(...els);}replaceChildren(...v){this.children=v;}getContext(){return drawing;}
     getBoundingClientRect(){return {left:0,top:0,width:1280,height:800};}querySelector(id){return element(id);}querySelectorAll(){return [];}
   }
   const element=id=>{if(!elements.has(id))elements.set(id,new Element(id));return elements.get(id);};
   class Image {set src(value){this.complete=true;this.naturalWidth=100;this.naturalHeight=100;Promise.resolve().then(()=>this.onload?.());}}
-  context={console,Image,Gathering,HeroRun,JianghuStory,Martial,VillageMap:map,devicePixelRatio:1,Math,Map,Set,Promise,Date,Number,
+  context={console,Image,Gathering,HeroRun,JianghuStory,Martial,Manuals,VillageMap:map,devicePixelRatio:1,Math,Map,Set,Promise,Date,Number,
     localStorage:{getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,v)},
     document:{activeElement:element('#game'),querySelector:element,createElement:()=>new Element(),createTextNode:text=>({textContent:text}),addEventListener(){}},
     addEventListener:(key,cb)=>events[key]=cb,requestAnimationFrame:cb=>{frame=cb;return 1;},cancelAnimationFrame(){},
@@ -51,7 +51,7 @@ async function run(){
   const reloaded=new Gathering(context.localStorage);assert.equal(reloaded.total,1,'Discarded inventory survives re-creation from saved data');
   element('#quest').click();advance(1500);
   assert.equal(element('#speaker-name').textContent,'老村长','Quest reaches the village chief at his new doorstep');
-  assert.equal(element('#npc-identity').textContent,'老村长 · 村长');assert.equal(element('#npc-realm').textContent,'淬体一重');
+  assert.equal(element('#npc-identity').textContent,'老村长 · 村长');assert.equal(element('#npc-realm').textContent,'淬体二段');
   element('#close-dialogue').click();
   const nearbyFlower=Gathering.nodes.find(n=>n.id==='guestFlowers');
   element('#game').pointerdown({clientX:(map.elder.x+nearbyFlower.x)/2*.8,clientY:(map.elder.y+nearbyFlower.y)/2*.8});advance(180);
@@ -67,7 +67,7 @@ async function run(){
   battleReturn('defeat',false);
   assert.equal(new JianghuStory(context.localStorage).flags.spar,false,'A defeat opens teaching rather than automatically granting a skill');
   assert.equal(element('#speaker-name').textContent,'武青山');
-  assert.equal(element('#npc-identity').textContent,'武青山 · 武师');assert.equal(element('#npc-realm').textContent,'通脉二重');
+  assert.equal(element('#npc-identity').textContent,'武青山 · 武师');assert.equal(element('#npc-realm').textContent,'通脉五段');
   advance(500);element('#dialogue-next').click();advance(500);
   const lesson=element('#choices').children.find(b=>b.textContent.includes('学习推山掌'));assert.ok(lesson);lesson.click();
   assert.equal(new Martial.Progression(context.localStorage).learned,true,'Explicitly accepting the lesson saves both palm and meditation');

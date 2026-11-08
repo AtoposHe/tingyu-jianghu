@@ -36,7 +36,7 @@
   const keepsakes=new Gathering(storage);
   let chosenFlower=null;
   function stopCollecting(){chosenFlower=null;$('#gather-prompt').hidden=true;$('#interaction').hidden=true;}
-  const bag=new InventoryView(keepsakes,()=>{stopCollecting();keys.clear();path=[];destination=null;pendingTalk=false;heroRun.reset();hero.walking=false;});
+  const bag=new InventoryView(keepsakes,()=>{stopCollecting();keys.clear();path=[];destination=null;pendingTalk=false;heroRun.reset();hero.walking=false;},martial,()=>cultivation.render());
   bag.render();
   const chronicle=new JianghuStory(storage);
   const storyView=new StoryView(chronicle,()=>{
@@ -47,11 +47,11 @@
     if(battle.active||dialogueOpen||bag.active||storyView.active||cultivation.active)return false;
     stopCollecting();keys.clear();path=[];destination=null;pendingTalk=false;heroRun.reset();hero.walking=false;
   },()=>{keys.clear();lastTime=0;canvas.focus({preventScroll:true});},()=>{
-    if(martial.cultivation>0)markStory('meditate');
+    if(martial.cultivation>=1)markStory('meditate');
   });
   // Older story saves cannot bypass the new lesson; new cultivation progress restores its goals.
   if(!martial.learned){chronicle.flags.spar=false;chronicle.flags.meditate=false;chronicle.flags.practice=false;chronicle.save();}
-  else {markStory('spar');if(martial.cultivation>0)markStory('meditate');if(martial.practiced)markStory('practice');}
+  else {markStory('spar');if(martial.cultivation>=1)markStory('meditate');if(martial.practiced)markStory('practice');}
   storyView.open();
   function markStory(flag){chronicle.mark(flag);storyView.render();}
   function flowerNear(node){return Math.hypot(hero.x-node.x,hero.y-node.y)<66&&Math.abs(VillageMap.surfaceAt(hero.x,hero.y).height-VillageMap.surfaceAt(node.x,node.y).height)<2&&VillageMap.canStep(hero,node);}
@@ -93,9 +93,9 @@
     adviceEnd: { text:'莫急着问天下第一是谁。先认清脚下的路，珍惜眼前的人。江湖里的好故事，往往便从一句问候开始。', next:'question' },
     farewell: { text:'去吧，小友。愿你此去，有清风相伴，有知己同行。若哪天走累了，听雨村里总有一盏茶等你。', next:null, completes:true },
     return: { text:'小友，又见面了。江湖路上可有什么新鲜事？坐下来慢慢说，老夫最不缺的，便是听故事的工夫。', next:'question' },
-    trainer: { text:'清河镖局的人？你师父曾与我并肩护过镖。寻人要紧，但江湖路远，光凭一腔急切可不够。你尚未习得武学，先以拳脚与我走几招。你只有淬体一重、二十点灵力，我已是通脉二重。先认真交手，看看根基的差距；落败后我再传你掌法和吐纳法。', choices:[['请指教，开始切磋！','startBattle'],['下次再来。','trainerBye']] },
+    trainer: { text:'清河镖局的人？你师父曾与我并肩护过镖。寻人要紧，但江湖路远，光凭一腔急切可不够。你尚未习得武学，先以拳脚与我走几招。你只有淬体二段、二十点灵力，我已是通脉五段、百五十点灵力。先认真交手，看看根基的差距；落败后我再传你掌法和吐纳法。', choices:[['请指教，开始切磋！','startBattle'],['下次再来。','trainerBye']] },
     trainerLesson: { text:'你肯认真走完这几招，便值得教。我这一式推山掌只需八点灵力：先沉肩护住中门，再吐劲推出。护势能替你抵去下一击六成伤害；你现在二十点灵力，已够起掌。', next:'trainerBreathing' },
-    trainerBreathing: { text:'但招式撑得一时，根基才撑得长久。打坐时凝神调息，静修两分钟，灵力上限才增一点，气血也增两点；累计十分钟方能突破淬体二重。莫急，回合间双方都会自然回灵。', choices:[['谨记教诲，学习推山掌与吐纳法。','learnMartial'],['容我再想想。','trainerBye']] },
+    trainerBreathing: { text:'但招式撑得一时，根基才撑得长久。打坐时凝神调息，静修两分钟，灵力上限才增一点，气血也增两点；灵力决定境界，每境分十段。淬体到一百点时，必须完成突破历练才能进入通脉；历练尚未开启时就先收功，不能硬练越境。莫急，回合间双方都会自然回灵。', choices:[['谨记教诲，学习推山掌与吐纳法。','learnMartial'],['容我再想想。','trainerBye']] },
     trainerLearned: { text:'推山掌与吐纳法已记下。按 R 查看修为并开始打坐；每回合结束，你会回灵两点。现在再试一次，用推山掌护势，应能多撑几招。仍胜不了我也无妨，日积月累才有精进。', choices:[['以推山掌再次请教！','startBattle'],['先打坐修炼。','openCultivation'],['稍后再来。','trainerBye']] },
     trainerReturn: { text:'掌势可曾记牢？你我都遵循同样的修炼之道：修为进境，气血灵力随之增长，境界提升后拳劲、防御与回灵也会增长。打坐贵在恒久，切磋贵在体会。', choices:[['请指教，切磋一场。','startBattle'],['去打坐修炼。','openCultivation'],['稍后再来。','trainerBye']] },
     trainerBye: { text:'好，练武贵在持之以恒。我就在听雨武馆门前，少侠随时可以来找我。', next:null },
@@ -119,7 +119,7 @@
             closeDialogue();keys.clear();path=[];destination=null;pendingTalk=false;
             $('#interaction').hidden=true;battle.start(activeNpc.id);
           } else if(id==='learnMartial') {
-            if(martial.learn()){markStory('spar');cultivation.render();announce('习得推山掌与吐纳法 · 战斗按 2 施掌，地图按 R 修炼');}
+            if(martial.learn()){markStory('spar');cultivation.render();bag.render();announce('习得推山掌与吐纳法 · 战斗按 2 施掌，地图按 R 修炼');}
             showNode('trainerLearned');
           } else if(id==='openCultivation'){closeDialogue();cultivation.open();}
           else showNode(id);

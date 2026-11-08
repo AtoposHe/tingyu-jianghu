@@ -8,8 +8,8 @@
   <link rel="stylesheet" href="style.css?v=3a0aa2c23633">
   <link rel="stylesheet" href="battle.css?v=35f61060bdd1">
   <link rel="stylesheet" href="map-ui.css?v=7aeaa9b37c58">
-  <link rel="stylesheet" href="inventory.css?v=59de237c12a7">
-  <link rel="stylesheet" href="cultivation.css?v=da000d74c907">
+  <link rel="stylesheet" href="inventory.css?v=929c3f7c7d96">
+  <link rel="stylesheet" href="cultivation.css?v=65242c907f69">
   <link rel="stylesheet" href="story.css?v=f303fef5de98">
 </head>
 <body>
@@ -28,15 +28,15 @@
       <button id="gather-prompt" class="gather-prompt" type="button" hidden><kbd>F</kbd><span id="gather-label">收集</span></button>
       <div class="map-bottom"><div class="map-buttons"><button id="bag-toggle" class="bag-button" type="button">行囊 <span id="bag-count">0</span> · B</button><button id="cultivation-toggle" class="map-action" type="button">修为 · R</button><button id="find-trainer" class="map-action" type="button">⚔ 寻访武师</button><button id="reset" class="map-action" type="button">↺ 回到村口</button></div></div>
       <div id="dialogue" class="dialogue" hidden role="dialog" aria-modal="true" aria-labelledby="speaker-name">
-        <div class="portrait-wrap"><img src="assets/q/village-chief.png" alt="老村长，银发白须，拄着木杖，神情亲切"><div class="npc-information"><span id="npc-identity">老村长 · 村长</span><span id="npc-realm">淬体一重</span></div></div>
+        <div class="portrait-wrap"><img src="assets/q/village-chief.png" alt="老村长，银发白须，拄着木杖，神情亲切"><div class="npc-information"><span id="npc-identity">老村长 · 村长</span><span id="npc-realm">淬体二段</span></div></div>
         <div class="dialogue-content"><div class="speaker-row"><h3 id="speaker-name">老村长</h3><button id="close-dialogue" aria-label="关闭对话" type="button">×</button></div><p id="dialogue-text"></p><div id="choices" class="choices"></div><button id="dialogue-next" type="button">继续 <span>↵</span></button></div>
       </div>
       <section id="battle" class="battle" hidden aria-label="演武场回合制切磋">
         <header class="battle-heading"><div><small id="battle-location">听雨武馆 · 演武院</small><h2>以武会友</h2></div><div class="round-badge">第 <strong id="battle-round">一</strong> 回合<span id="battle-phase">你的回合</span></div><button id="battle-yield" type="button">认输离场 ↗</button></header>
         <div class="combatants">
-          <div class="fighter-card hero-card"><div class="fighter-title"><span>你</span><strong>无名少侠</strong><small id="hero-realm">淬体一重</small></div><div class="stat"><span>气血</span><div id="hero-hp-meter" class="meter hp" role="progressbar" aria-label="少侠气血" aria-valuemin="0" aria-valuemax="100"><i id="hero-hp-bar"></i></div><b id="hero-hp">100 / 100</b></div><div class="stat"><span>灵力</span><div id="hero-mp-meter" class="meter mp" role="progressbar" aria-label="少侠灵力" aria-valuemin="0" aria-valuemax="20"><i id="hero-mp-bar"></i></div><b id="hero-mp">20 / 20</b></div></div>
+          <div class="fighter-card hero-card"><div class="fighter-title"><span>你</span><strong>无名少侠</strong><small id="hero-realm">淬体二段</small></div><div class="stat"><span>气血</span><div id="hero-hp-meter" class="meter hp" role="progressbar" aria-label="少侠气血" aria-valuemin="0" aria-valuemax="100"><i id="hero-hp-bar"></i></div><b id="hero-hp">100 / 100</b></div><div class="stat"><span>灵力</span><div id="hero-mp-meter" class="meter mp" role="progressbar" aria-label="少侠灵力" aria-valuemin="0" aria-valuemax="20"><i id="hero-mp-bar"></i></div><b id="hero-mp">20 / 20</b></div></div>
           <span class="versus">切 磋</span>
-          <div class="fighter-card enemy-card"><div class="fighter-title"><span>友</span><strong>武青山</strong><small id="enemy-realm">通脉二重</small></div><div class="stat"><span>气血</span><div id="enemy-hp-meter" class="meter hp" role="progressbar" aria-label="武青山气血" aria-valuemin="0" aria-valuemax="248"><i id="enemy-hp-bar"></i></div><b id="enemy-hp">248 / 248</b></div><div class="stat"><span>灵力</span><div id="enemy-mp-meter" class="meter mp" role="progressbar" aria-label="武青山灵力" aria-valuemin="0" aria-valuemax="82"><i id="enemy-mp-bar"></i></div><b id="enemy-mp">82 / 82</b></div></div>
+          <div class="fighter-card enemy-card"><div class="fighter-title"><span>友</span><strong>武青山</strong><small id="enemy-realm">通脉五段</small></div><div class="stat"><span>气血</span><div id="enemy-hp-meter" class="meter hp" role="progressbar" aria-label="武青山气血" aria-valuemin="0" aria-valuemax="360"><i id="enemy-hp-bar"></i></div><b id="enemy-hp">360 / 360</b></div><div class="stat"><span>灵力</span><div id="enemy-mp-meter" class="meter mp" role="progressbar" aria-label="武青山灵力" aria-valuemin="0" aria-valuemax="150"><i id="enemy-mp-bar"></i></div><b id="enemy-mp">150 / 150</b></div></div>
         </div>
         <div class="battle-stage" id="battle-stage">
           <canvas id="battle-canvas" aria-label="双方出招、受击和灵力特效的动态战斗画面"></canvas>
@@ -47,15 +47,27 @@
         <div id="battle-result" class="battle-result" hidden role="dialog" aria-modal="true" aria-labelledby="result-title"><div class="result-paper"><small>点到即止 · 以武会友</small><h3 id="result-title">切磋获胜</h3><p id="result-message"></p><div class="result-actions"><button id="battle-again" type="button">再切磋一次</button><button id="battle-return" type="button">返回听雨村 ↗</button></div></div></div>
       </section>
     </section>
-    <footer class="below-map"><div class="character-chip"><img src="assets/q/hero-idle.png" alt="Q版无名少侠"><div><strong>无名少侠</strong><span>江湖路远，且行且看。</span></div><span id="map-hero-realm" class="level">淬体一重</span></div><div class="controls"><span><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> / 方向键移动</span><span><kbd>E</kbd> 交谈 · <kbd>1</kbd> 出拳 / <kbd>2</kbd> 推山掌</span><span class="mouse-hint">◇ 点击地面行走 · 点击人物交谈</span></div></footer>
-    <div class="page-note"><span>F 收集花卉 · B 行囊 · R 修炼</span><span>原创场景 · 修炼篇 10</span></div>
+    <footer class="below-map"><div class="character-chip"><img src="assets/q/hero-idle.png" alt="Q版无名少侠"><div><strong>无名少侠</strong><span>江湖路远，且行且看。</span></div><span id="map-hero-realm" class="level">淬体二段</span></div><div class="controls"><span><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> / 方向键移动</span><span><kbd>E</kbd> 交谈 · <kbd>1</kbd> 出拳 / <kbd>2</kbd> 推山掌</span><span class="mouse-hint">◇ 点击地面行走 · 点击人物交谈</span></div></footer>
+    <div class="page-note"><span>F 收集花卉 · B 行囊 · R 修炼</span><span>原创场景 · 藏经篇 11</span></div>
     <div id="announcement" role="status" aria-live="polite"></div>
   </main>
   <section id="story-opening" class="story-overlay" role="dialog" aria-modal="true" aria-labelledby="story-title"><div class="story-paper"><span class="story-kicker">听雨江湖 · 第一回</span><h2 id="story-title">一封旧信，半枚镖牌</h2><p class="story-time">景和七年 · 暮春　｜　江南青州 · 听雨村　｜　架空江湖</p><div class="story-columns"><div class="story-copy"><p>十年前的夜渡镖案，早已成了茶客口中的旧闻。如今青州商道重开，封存的镖号却又出现在河埠的货箱上。听雨村依旧炊烟袅袅，平静之下，似有旧事回潮。</p><p>你十八岁，自幼被清河镖局收养，跟着师父做杂役、认路途，只学过几手粗浅拳脚。三个月前，师父随一趟镖队出门，从此音讯全无。你没有名门靠山，也不知自己的身世。</p><p>临行前，你从旧箱底找到半枚刻着水纹的镖牌，以及一封未寄出的信。信封上，只有四个字：听雨村长。</p><blockquote>“若有一日我未能归来，去听雨村。先问来路，再问刀剑。”</blockquote><p>你带着旧信走进村口。此行，先寻师父，也寻一个能让自己立足江湖的答案。</p></div><div class="story-plan"><h3>初入江湖 · 从这里开始</h3><ol id="story-goals"></ol><p class="story-future">后续故事规划 · 尚未开放<br>到杏花酒肆追访夜渡旧闻 → 请铁匠辨认镖牌水纹 → 沿商道寻找失踪镖队。选择如何待人、是否守诺，也将成为江湖成长的一部分。</p></div></div><button id="story-enter" class="story-enter" type="button" disabled>踏入听雨村 ↗</button></div></section>
-  <div id="inventory" class="bag-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="bag-title"><section class="bag-paper"><header class="bag-header"><div><small>江南拾芳 · 随身收藏</small><h2 id="bag-title">少侠行囊</h2></div><button type="button" class="bag-close" id="bag-close" aria-label="关闭背包">×</button></header><p id="bag-summary" class="bag-summary"></p><div class="bag-content"><div id="bag-grid" class="bag-grid" aria-label="背包物品"></div><div class="bag-detail"><div id="bag-detail"></div><div id="discard-menu" class="discard-menu" hidden><p id="discard-name"></p><small>每次丢弃 1 件，丢弃后无法恢复。</small><button id="discard-confirm" type="button">F 确认丢弃</button><button id="discard-cancel" type="button">取消</button></div><p id="bag-feedback" role="status" aria-live="polite"></p></div></div><p class="bag-hint">靠近花草后按 F 收集 · 右键物品后按 F 丢弃 1 件 · Esc 取消 / B 关闭<br><span id="bag-save"></span></p></section></div>
-  <section id="cultivation" class="cultivation-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="cultivation-title"><div class="cultivation-paper"><header><div><small>武青山所传 · 基础吐纳法</small><h2 id="cultivation-title">静坐修心</h2></div><button id="cultivation-close" type="button" aria-label="关闭修炼">×</button></header><p><strong id="cultivation-realm">淬体一重</strong><br><span id="cultivation-stats"></span></p><div class="cultivation-breath" aria-hidden="true">吐纳</div><p id="meditation-status" role="status">心息归宁</p><div class="cultivation-progress-row"><span>境界修为</span><span id="cultivation-progress"></span></div><div class="meter"><i id="cultivation-bar"></i></div><p id="cultivation-next"></p><p id="cultivation-skill"></p><p class="cultivation-rule">静修每秒积累一息，两分钟灵力上限 +1、气血上限 +2；首层突破需十分钟，后续逐层更久。关闭或切到后台即收功，进度自动保存。</p><button id="meditate-toggle" type="button">开始打坐</button></div></section>
-  <script src="martial.js?v=68138e981e63"></script>
-  <script src="cultivation.js?v=b2c0d06f0a71"></script>
+  <div id="inventory" class="bag-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="bag-title"><section class="bag-paper"><header class="bag-header"><div><small>江南拾芳 · 随身收藏</small><h2 id="bag-title">少侠行囊</h2></div><button type="button" class="bag-close" id="bag-close" aria-label="关闭背包">×</button></header><nav class="bag-tabs" aria-label="行囊分页"><button id="bag-items-tab" type="button" aria-pressed="true">花卉物品</button><button id="bag-books-tab" type="button" aria-pressed="false">功法典籍</button></nav><p id="bag-summary" class="bag-summary"></p><div id="bag-items" class="bag-content"><div id="bag-grid" class="bag-grid" aria-label="背包物品"></div><div class="bag-detail"><div id="bag-detail"></div><div id="discard-menu" class="discard-menu" hidden><p id="discard-name"></p><small>每次丢弃 1 件，丢弃后无法恢复。</small><button id="discard-confirm" type="button">F 确认丢弃</button><button id="discard-cancel" type="button">取消</button></div><p id="bag-feedback" role="status" aria-live="polite"></p></div></div><section id="bag-books" class="bag-books" hidden><p id="manual-empty" class="manual-empty">书架尚空。向武青山学习后，传授的内功与掌谱会收录于此。</p><div id="manual-grid" class="manual-grid"></div><article id="book-reader" class="book-reader" hidden><button id="book-back" type="button">← 返回书架</button><header><small id="book-source"></small><h3 id="book-title"></h3><span>完整功法原文 · 原创江湖典籍</span></header><div id="book-text" class="book-text"></div><section class="book-explanation"><h4>修习与施展说明</h4><p id="book-explanation"></p><button id="book-use" type="button">设为当前修炼功法</button></section></article></section><p id="bag-item-hint" class="bag-hint">靠近花草后按 F 收集 · 右键物品后按 F 丢弃 1 件 · Esc 取消 / B 关闭<br><span id="bag-save"></span></p></section></div>
+  <section id="cultivation" class="cultivation-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="cultivation-title"><div class="cultivation-paper">
+    <header><div><small>听雨江湖 · 功法修炼</small><h2 id="cultivation-title">静坐修心</h2></div><button id="cultivation-close" type="button" aria-label="关闭修炼">×</button></header>
+    <div class="cultivation-layout"><div class="meditation-scene"><span class="meditation-inscription">守一息清宁 · 养方寸天地</span><div class="meditation-ground"></div><div class="qi-orbit orbit-one"></div><div class="qi-orbit orbit-two"></div><div class="qi-particles" aria-hidden="true"><i style="--i:0"></i><i style="--i:1"></i><i style="--i:2"></i><i style="--i:3"></i><i style="--i:4"></i><i style="--i:5"></i><i style="--i:6"></i><i style="--i:7"></i></div><img id="meditation-hero" src="assets/q/hero-meditation.png" alt="青衣少侠闭目盘腿，两手置于膝上，静坐修炼"><p id="meditation-status" role="status">心息归宁</p></div>
+    <div class="cultivation-details"><p class="cultivation-attributes"><strong id="cultivation-realm">淬体二段</strong><br><span id="cultivation-stats"></span></p>
+    <label class="method-label" for="cultivation-method">当前修炼功法</label><select id="cultivation-method" aria-label="当前修炼功法"></select><p id="cultivation-method-note"></p>
+    <div class="cultivation-progress-row"><span>本境灵力</span><span id="cultivation-progress"></span></div><div class="meter"><i id="cultivation-bar"></i></div>
+    <p id="cultivation-next"></p><div class="meter practice-meter"><i id="practice-bar"></i></div>
+    <section id="breakthrough-card" class="breakthrough-card"><small>境界突破</small><strong id="breakthrough-name"></strong><p id="breakthrough-status"></p><p id="breakthrough-description"></p><button id="breakthrough-button" type="button" disabled>突破任务待开放</button></section>
+    <section id="title-section" class="title-section" hidden><label for="master-title">你的江湖封号</label><div><input id="master-title" maxlength="12" placeholder="如：听雨"><button id="title-save" type="button">定下封号</button></div><p id="title-feedback" role="status"></p></section>
+    <p id="cultivation-skill"></p><button id="meditate-toggle" type="button">开始打坐</button><p id="cultivation-save"></p></div></div>
+    <p class="cultivation-rule">六境各分十段 · 灵力达到大境界上限时须先完成突破任务。关闭或切到后台即收功，不计算离线修炼。已学功法与招式可在行囊的“功法典籍”中阅读全文。</p>
+  </div></section>
+  <script src="manuals.js?v=c6a54bf7ae6a"></script>
+  <script src="martial.js?v=3503a70c435d"></script>
+  <script src="cultivation.js?v=1d406b2e1b43"></script>
   <script src="combat-rules.js?v=6ad256978d69"></script>
   
   <script src="battle-moves.js?v=f5ea6c42d061"></script>
@@ -67,9 +79,9 @@
   <script src="battle.js?v=f11889470e33"></script>
   <script src="village-map.js?v=37a599cad30b"></script>
   <script src="gathering.js?v=d74dd4d7166d"></script>
-  <script src="inventory.js?v=5f279bfc6539"></script>
+  <script src="inventory.js?v=a00f330e6171"></script>
   <script src="story.js?v=c025d21b72da"></script>
   <script src="story-view.js?v=4900e4b1dced"></script>
-  <script src="game.js?v=73ad2061e011"></script>
+  <script src="game.js?v=ba1ffb3e3328"></script>
 </body>
 </html>

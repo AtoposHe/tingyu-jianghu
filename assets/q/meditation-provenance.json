@@ -1,0 +1,8 @@
+{
+  "tool": "built-in image_gen",
+  "asset": "assets/q/hero-meditation.png",
+  "reference": "assets/q/hero-idle.png",
+  "prompt": "Use case: identity-preserve. Asset type: transparent PNG game character meditation pose. Reference image: assets/q/hero-idle.png, identity and guofeng chibi painting style reference. Draw the EXACT same adorable Chinese wuxia chibi young male protagonist in a new full-body seated cross-legged lotus meditation pose, slight three-quarter view facing right, eyes gently closed, peaceful smile. BOTH complete arms and BOTH hands visible, hands relaxed resting palm-up on the knees. BOTH bent legs and boot tips visible with clear plausible anatomy. Keep same brown long ponytail/topknot, small gold jade crown, teal and white flowing robe with gold cloud embroidery, bamboo ink pattern front skirt, jade belt pendant and red tassel. Large head, short compact body matching reference. Beautiful intricate hand-painted Chinese fantasy game sprite with clean silhouette and delicate warm outlines. No aura, no glow, no effects, no scenery, no platform, no shadow, no text. Center the whole seated figure with transparent padding, no cropped hands/head/hair/feet, genuine transparent alpha background. This is a single pose sprite, not a sprite sheet.",
+  "alpha": true,
+  "notes": "Complete seated pose; animated in CSS with breathing, qi particles and method-specific effects. Original generated PNG pixels and alpha preserved."
+}

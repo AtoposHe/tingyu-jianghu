@@ -42,7 +42,7 @@ async function run(){
   assert.equal(el('#battle-location').textContent,'听雨武馆 · 演武院');
   b.progression.recordBattle('defeat',false);b.progression.learn();b.start('trainer');await flush();
   b.attack('skill');assert.equal(b.motion.profile.id,'mountain','Learned hero palm uses the full skill animation and effects');
-  b.hit();assert.equal(b.state.hero.mp,12);assert.equal(b.state.hero.guard,.6);assert.equal(b.state.enemy.hp,227);
+  b.hit();assert.equal(b.state.hero.mp,12);assert.equal(b.state.hero.guard,.6);assert.equal(b.state.enemy.hp,339);
   assert.ok(b.floaters.some(f=>f.text==='灵力 -8'));
   assert.equal(el('#skill-name').textContent,'推山掌');assert.equal(el('#skill-key').textContent,'2');
   b.motion=null;b.busy=false;b.state.phase='player';b.state.hero.mp=7;b.attack('skill');assert.equal(b.motion,null,'Low spirit must not begin an animation');
