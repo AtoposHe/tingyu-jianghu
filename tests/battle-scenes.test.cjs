@@ -25,7 +25,7 @@ async function run(){
   const context={console,Image,Map,Object,Math,Promise,ResizeObserver:class{observe(){}},
     document:{querySelector:el,createElement:()=>new Element(),addEventListener(){}},
     QSprites:{load:()=>Promise.resolve(),height:275},BattleFX:class{},
-    CombatRules:require('../combat-rules.js'),BattleMoves:require('../battle-moves.js'),
+    Martial:require('../martial.js'),CombatRules:require('../combat-rules.js'),BattleMoves:require('../battle-moves.js'),
     requestAnimationFrame:()=>1,cancelAnimationFrame(){},devicePixelRatio:1,addEventListener(){}};
   context.window=context;vm.createContext(context);
   for(const file of ['battle-scenes.js','battle.js'])vm.runInContext(fs.readFileSync(path.join(__dirname,'..',file),'utf8'),context);
@@ -40,6 +40,12 @@ async function run(){
   b.start('trainer');await flush();assert.equal(b.background,dojo);assert.equal(b.scene.id,'dojo');
   b.attack();assert.equal(b.motion.side,'hero');assert.equal(b.state.hero.hp,100);
   assert.equal(el('#battle-location').textContent,'听雨武馆 · 演武院');
-  console.log('PASS opponent scenes, aspect-preserving crop, async race protection, rematch and attack entry');
+  b.progression.recordBattle('defeat',false);b.progression.learn();b.start('trainer');await flush();
+  b.attack('skill');assert.equal(b.motion.profile.id,'mountain','Learned hero palm uses the full skill animation and effects');
+  b.hit();assert.equal(b.state.hero.mp,12);assert.equal(b.state.hero.guard,.6);assert.equal(b.state.enemy.hp,227);
+  assert.ok(b.floaters.some(f=>f.text==='灵力 -8'));
+  assert.equal(el('#skill-name').textContent,'推山掌');assert.equal(el('#skill-key').textContent,'2');
+  b.motion=null;b.busy=false;b.state.phase='player';b.state.hero.mp=7;b.attack('skill');assert.equal(b.motion,null,'Low spirit must not begin an animation');
+  console.log('PASS opponent scenes, async race protection, rematch, learned hero skill animation, impact cost/guard and insufficient-spirit input');
 }
 module.exports=run();

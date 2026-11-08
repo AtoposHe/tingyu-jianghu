@@ -1,68 +1,31 @@
-/* Run with: node tests/combat-rules.test.cjs */
-const assert = require('node:assert/strict');
-const rules = require('../combat-rules.js');
-let checks = 0;
-function test(name, run) { run(); checks++; console.log('PASS', name); }
-
-test('Player attacks first; early enemy action is rejected without mutation', () => {
-  const state=rules.create(), before=JSON.stringify(state);
-  assert.throws(()=>rules.resolve(state,'enemy','normal'));
-  assert.equal(JSON.stringify(state),before);
-});
-test('Unlearned hero skill cannot consume energy or deal damage', () => {
-  const state=rules.create(), before=JSON.stringify(state);
-  assert.throws(()=>rules.resolve(state,'hero','skill'));
-  assert.equal(JSON.stringify(state),before);
-});
-test('Punch builds mana and hands over turn; duplicate attack is rejected', () => {
-  const state=rules.create();
-  const hit=rules.resolve(state,'hero','normal');
-  assert.equal(state.enemy.hp,98);assert.equal(state.hero.mp,20);
-  assert.equal(hit.mpChange,10);assert.equal(state.phase,'enemy');
-  assert.throws(()=>rules.resolve(state,'hero','normal'));
-  rules.resolve(state,'enemy',rules.enemyAction(state));
-  assert.equal(state.hero.hp,86);assert.equal(state.enemy.mp,38);
-  assert.equal(state.round,2);assert.equal(state.phase,'player');
-});
-test('NPC chooses skill on round two; the palm consumes 20 mana', () => {
-  const state=rules.create();
-  rules.resolve(state,'hero','normal');rules.resolve(state,'enemy','normal');
-  rules.resolve(state,'hero','normal');
-  assert.equal(rules.enemyAction(state),'skill');
-  const hit=rules.resolve(state,'enemy','skill');
-  assert.equal(hit.mpChange,-20);assert.equal(state.enemy.mp,18);assert.equal(state.hero.hp,66);
-});
-test('Not enough mana forbids skills and falls back to a normal reply', () => {
-  const state=rules.create();state.phase='enemy';state.round=2;state.enemy.mp=19;
-  assert.equal(rules.enemyAction(state),'normal');
-  const before=JSON.stringify(state);
-  assert.throws(()=>rules.resolve(state,'enemy','skill'));
-  assert.equal(JSON.stringify(state),before);
-});
-test('Spirit is capped; lethal damage is clamped; a defeated NPC cannot reply', () => {
-  const state=rules.create();state.hero.mp=58;state.enemy.hp=3;
-  const hit=rules.resolve(state,'hero','normal');
-  assert.equal(state.hero.mp,60);assert.equal(hit.mpChange,2);
-  assert.equal(hit.damage,3);assert.equal(state.enemy.hp,0);assert.equal(state.phase,'victory');
-  assert.throws(()=>rules.resolve(state,'enemy','normal'));
-});
-test('Player defeat ends the fight and rejects subsequent attacks', () => {
-  const state=rules.create();state.phase='enemy';state.hero.hp=1;
-  rules.resolve(state,'enemy','normal');
-  assert.equal(state.hero.hp,0);assert.equal(state.phase,'defeat');
-  assert.throws(()=>rules.resolve(state,'hero','normal'));
-});
-test('Complete fight reaches victory in six rounds, with two NPC skills', () => {
-  const state=rules.create();let skills=0;
-  while(state.phase==='player') {
-    rules.resolve(state,'hero','normal');
-    if(state.phase==='enemy') {
-      const action=rules.enemyAction(state);if(action==='skill')skills++;
-      rules.resolve(state,'enemy',action);
-    }
-  }
-  assert.equal(state.phase,'victory');assert.equal(state.round,6);
-  assert.equal(state.hero.hp,18);assert.equal(state.hero.mp,60);assert.equal(skills,2);
-  const replay=rules.create();assert.equal(replay.hero.hp,100);assert.equal(replay.hero.mp,10);assert.equal(replay.enemy.hp,120);
-});
-console.log(`${checks} combat checks passed.`);
+const assert=require('node:assert/strict'),rules=require('../combat-rules.js'),martial=require('../martial.js');
+const learned=()=>rules.create(martial.person('hero',0,['mountain']));
+let state=rules.create(),before=JSON.stringify(state);
+assert.equal(state.hero.mp,20);assert.equal(state.hero.maxHp,100);
+assert.equal(state.enemy.name,'武青山');assert.equal(state.enemy.realmName,'通脉二重');
+assert.throws(()=>rules.resolve(state,'enemy','normal'));assert.equal(JSON.stringify(state),before);
+assert.throws(()=>rules.resolve(state,'hero','skill'));assert.equal(JSON.stringify(state),before);
+let hit=rules.resolve(state,'hero','normal');assert.equal(hit.mpChange,0);assert.equal(state.hero.mp,20);
+assert.equal(hit.damage,6);assert.equal(state.phase,'enemy');assert.throws(()=>rules.resolve(state,'hero','normal'));
+state=learned();hit=rules.resolve(state,'hero','skill');assert.equal(state.hero.mp,12);assert.equal(hit.mpChange,-8);assert.equal(hit.damage,21);
+hit=rules.resolve(state,'enemy','normal');assert.equal(hit.guarded,true);assert.equal(hit.damage,12);assert.equal(state.hero.guard,0);
+assert.equal(state.hero.mp,14);assert.equal(state.round,2);assert.equal(state.phase,'player');
+assert.deepEqual(hit.recovery,[{side:'hero',amount:2},{side:'enemy',amount:0}]);
+rules.resolve(state,'hero','normal');assert.equal(rules.enemyAction(state),'skill');
+hit=rules.resolve(state,'enemy','skill');assert.equal(hit.mpChange,-8);assert.equal(state.enemy.mp,77);assert.equal(state.enemy.guard,.6);
+state=learned();state.hero.mp=7;before=JSON.stringify(state);
+assert.throws(()=>rules.resolve(state,'hero','skill'),/灵力不足/);assert.equal(JSON.stringify(state),before);
+state.phase='enemy';state.round=2;state.enemy.mp=7;assert.equal(rules.enemyAction(state),'normal');
+state=learned();state.enemy.hp=1;state.hero.mp=19;hit=rules.resolve(state,'hero','normal');
+assert.equal(hit.damage,1);assert.equal(state.enemy.hp,0);assert.equal(state.phase,'victory');assert.equal(state.hero.mp,19,'No extra recovery after a terminal action');assert.throws(()=>rules.resolve(state,'enemy','normal'));
+function battle(hero,useSkills){const s=rules.create(hero);let count=0;while(s.phase==='player'&&count++<100){rules.resolve(s,'hero',useSkills&&rules.canSkill(s.hero)?'skill':'normal');if(s.phase==='enemy')rules.resolve(s,'enemy',rules.enemyAction(s));}return s;}
+const first=battle(martial.person('hero'),false),second=battle(martial.person('hero',0,['mountain']),true);
+assert.equal(first.phase,'defeat');assert.equal(first.round,3);
+assert.equal(second.phase,'defeat');assert.equal(second.round,5);assert.ok(second.enemy.hp>0);
+const grown=battle(martial.person('hero',martial.threshold(5),['mountain']),true);
+assert.equal(grown.phase,'victory','Cultivation can eventually win honestly; no forced story defeat');
+// Swapping equal profiles preserves damage/cost. NPCs receive the same skill guard and round cap.
+state=learned();state.enemy={...state.hero,skills:[...state.hero.skills]};const a=rules.resolve(state,'hero','skill');
+state.enemy.guard=0;state.hero.guard=0;const b=rules.resolve(state,'enemy','skill');assert.equal(a.damage,b.damage);assert.equal(a.mpChange,b.mpChange);
+assert.ok(state.hero.mp<=state.hero.maxMp&&state.enemy.mp<=state.enemy.maxMp);
+console.log('PASS shared attributes, 20 starting spirit, costs, guard, full-round regen, illegal input, 3/5-round defeats and natural later victory');

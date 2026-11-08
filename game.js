@@ -8,7 +8,7 @@
   const hero = { ...VillageMap.spawn, facing: 1, walking: false };
   const heroRun=new HeroRun(),footDust=[];
   const npc = { id:'elder', name:'老村长', role:'听雨村 · 村长', src:'assets/q/village-chief.png', ...VillageMap.elder };
-  const trainer = { id:'trainer', name:'陆青山', role:'听雨村 · 武师', src:'assets/q/trainer-idle.png', ...VillageMap.trainer };
+  const trainer = { id:'trainer', name:'武青山', role:'听雨村 · 武师', src:'assets/q/trainer-idle.png', ...VillageMap.trainer };
   const villagers = [npc,trainer];
   let activeNpc=npc;
   const spawn = VillageMap.spawn;
@@ -19,16 +19,20 @@
   let dialogueOpen = false, currentNode = null, elapsed = 0, lastTime = 0;
   let typed = 0, textClock = 0, completed = false, animationId = 0;
   let toastTimer, audioContext = null, soundNodes = [], soundOn = false;
-  const battle = new SparringBattle(result => {
-    if(result==='victory'||result==='defeat')markStory('spar');
+  let storage;try{storage=window.localStorage;}catch{}
+  const martial=new Martial.Progression(storage);
+  const battle = new SparringBattle((result,hadSkill) => {
+    martial.recordBattle(result,hadSkill);
+    if(hadSkill&&['victory','defeat'].includes(result))markStory('practice');
+    cultivation.render();
     keys.clear();heroRun.reset();footDust.length=0;lastTime=0;canvas.focus({preventScroll:true});
-    announce('已返回听雨村。切磋点到即止，可随时再次挑战。');
-  });
+    if(martial.needsLesson){openDialogue(trainer);showNode('trainerLesson');}
+    else announce('已返回听雨村。切磋点到即止，伤势已恢复。');
+  },martial);
 
   const walkable=VillageMap.walkable;
   const findPath=VillageMap.findPath;
   const propOpacity=new Map();
-  let storage;try{storage=window.localStorage;}catch{}
   const keepsakes=new Gathering(storage);
   let chosenFlower=null;
   function stopCollecting(){chosenFlower=null;$('#gather-prompt').hidden=true;$('#interaction').hidden=true;}
@@ -36,15 +40,24 @@
   bag.render();
   const chronicle=new JianghuStory(storage);
   const storyView=new StoryView(chronicle,()=>{
-    if(battle.active||dialogueOpen||bag.active)return false;
+    if(battle.active||dialogueOpen||bag.active||cultivation.active)return false;
     stopCollecting();keys.clear();path=[];destination=null;pendingTalk=false;heroRun.reset();hero.walking=false;
   },()=>{keys.clear();lastTime=0;canvas.focus({preventScroll:true});});
+  const cultivation=new CultivationView(martial,()=>{
+    if(battle.active||dialogueOpen||bag.active||storyView.active||cultivation.active)return false;
+    stopCollecting();keys.clear();path=[];destination=null;pendingTalk=false;heroRun.reset();hero.walking=false;
+  },()=>{keys.clear();lastTime=0;canvas.focus({preventScroll:true});},()=>{
+    if(martial.cultivation>0)markStory('meditate');
+  });
+  // Older story saves cannot bypass the new lesson; new cultivation progress restores its goals.
+  if(!martial.learned){chronicle.flags.spar=false;chronicle.flags.meditate=false;chronicle.flags.practice=false;chronicle.save();}
+  else {markStory('spar');if(martial.cultivation>0)markStory('meditate');if(martial.practiced)markStory('practice');}
   storyView.open();
   function markStory(flag){chronicle.mark(flag);storyView.render();}
   function flowerNear(node){return Math.hypot(hero.x-node.x,hero.y-node.y)<66&&Math.abs(VillageMap.surfaceAt(hero.x,hero.y).height-VillageMap.surfaceAt(node.x,node.y).height)<2&&VillageMap.canStep(hero,node);}
   function nearestFlower(){return chosenFlower&&flowerNear(chosenFlower)?chosenFlower:Gathering.nodes.filter(flowerNear).sort((a,b)=>Math.hypot(a.x-hero.x,a.y-hero.y)-Math.hypot(b.x-hero.x,b.y-hero.y))[0];}
   function syncFlower(){
-    const nearby=closestNpc(),node=nearestFlower(),blocked=dialogueOpen||battle.active||bag.active||storyView.active;
+    const nearby=closestNpc(),node=nearestFlower(),blocked=dialogueOpen||battle.active||bag.active||storyView.active||cultivation.active;
     const talk=$('#interaction'),flower=$('#gather-prompt');
     talk.hidden=blocked||!nearby;flower.hidden=blocked||!!nearby||!node;
     if(nearby&&talk.dataset.npc!==nearby.id){talk.dataset.npc=nearby.id;const kbd=document.createElement('kbd');kbd.textContent='E';talk.replaceChildren(kbd,document.createTextNode(` 与${nearby.name}交谈`));}
@@ -54,7 +67,7 @@
     flower.disabled=remaining>0;
   }
   function confirmFlower(){
-    if(dialogueOpen||battle.active||bag.active||storyView.active||closestNpc())return;
+    if(dialogueOpen||battle.active||bag.active||storyView.active||cultivation.active||closestNpc())return;
     const node=nearestFlower();if(!node)return announce('请先走近路边花草，再按 F 收集。');
     if(keepsakes.remaining(node))return announce('花材还在再生，稍后再来看看。');
     keys.clear();path=[];destination=null;pendingTalk=false;heroRun.reset();
@@ -73,15 +86,19 @@
   const story = {
     greeting: { text:'小友，你手中这封信……字迹倒是眼熟。老夫是听雨村的村长，先歇歇脚。你远道而来，可是为了清河镖局的事？', next:'question' },
     question: { text:'这些年，村中有不少人问过夜渡旧案，可很少有人拿着旧物回来。你想先问些什么？', choices:[['请您看看这枚旧镖牌。','oldToken'],['请问此处是什么地方？','village'],['村长可有什么江湖忠告？','advice'],['向村长道别。','farewell']] },
-    oldToken: { text:'这半枚水纹镖牌，我见过。十年前夜渡案后，最后一名归来的镖师就在杏花酒肆落过脚。你师父三个月前也来问过此事。先别独自追去，去找武馆的陆青山，他与你师父有旧，能替你把把拳脚的根基。', next:'question',storyFlag:'chief' },
-    village: { text:'这里是听雨村。西北石阶上的枕间客舍可以歇脚，西巷有杏花酒肆。过桥向北是听雨武馆，陆师傅常在那里练武；你眼前这栋便是老夫的家。', next:'villageEnd' },
+    oldToken: { text:'这半枚水纹镖牌，我见过。十年前夜渡案后，最后一名归来的镖师就在杏花酒肆落过脚。你师父三个月前也来问过此事。先别独自追去，去找武馆的武青山，他与你师父有旧，能替你把把拳脚的根基。', next:'question',storyFlag:'chief' },
+    village: { text:'这里是听雨村。西北石阶上的枕间客舍可以歇脚，西巷有杏花酒肆。过桥向北是听雨武馆，武师傅常在那里练武；你眼前这栋便是老夫的家。', next:'villageEnd' },
     villageEnd: { text:'不过今日不必急着赶路。听听溪声，看看山色，也是行走江湖的一番滋味。待你准备好了，再去见那更大的天地。', next:'question' },
     advice: { text:'呵呵，忠告谈不上。只记住：手中有剑，心中也要有一分善意。路见不平时肯停下脚步，才算得上真正的侠客。', next:'adviceEnd' },
     adviceEnd: { text:'莫急着问天下第一是谁。先认清脚下的路，珍惜眼前的人。江湖里的好故事，往往便从一句问候开始。', next:'question' },
     farewell: { text:'去吧，小友。愿你此去，有清风相伴，有知己同行。若哪天走累了，听雨村里总有一盏茶等你。', next:null, completes:true },
     return: { text:'小友，又见面了。江湖路上可有什么新鲜事？坐下来慢慢说，老夫最不缺的，便是听故事的工夫。', next:'question' },
-    trainer: { text:'清河镖局的人？你师父曾与我并肩护过镖。寻人要紧，但江湖路远，光凭一腔急切可不够。你尚未习得武学，先以拳脚与我走几招。胜负不论，学会进退才是立身之本。', choices:[['请指教，开始切磋！','startBattle'],['下次再来。','trainerBye']] },
-    trainerBye: { text:'好，练武贵在持之以恒。我就在这村口，少侠随时可以来找我。', next:null },
+    trainer: { text:'清河镖局的人？你师父曾与我并肩护过镖。寻人要紧，但江湖路远，光凭一腔急切可不够。你尚未习得武学，先以拳脚与我走几招。你只有淬体一重、二十点灵力，我已是通脉二重。先认真交手，看看根基的差距；落败后我再传你掌法和吐纳法。', choices:[['请指教，开始切磋！','startBattle'],['下次再来。','trainerBye']] },
+    trainerLesson: { text:'你肯认真走完这几招，便值得教。我这一式推山掌只需八点灵力：先沉肩护住中门，再吐劲推出。护势能替你抵去下一击六成伤害；你现在二十点灵力，已够起掌。', next:'trainerBreathing' },
+    trainerBreathing: { text:'但招式撑得一时，根基才撑得长久。打坐时凝神调息，静修两分钟，灵力上限才增一点，气血也增两点；累计十分钟方能突破淬体二重。莫急，回合间双方都会自然回灵。', choices:[['谨记教诲，学习推山掌与吐纳法。','learnMartial'],['容我再想想。','trainerBye']] },
+    trainerLearned: { text:'推山掌与吐纳法已记下。按 R 查看修为并开始打坐；每回合结束，你会回灵两点。现在再试一次，用推山掌护势，应能多撑几招。仍胜不了我也无妨，日积月累才有精进。', choices:[['以推山掌再次请教！','startBattle'],['先打坐修炼。','openCultivation'],['稍后再来。','trainerBye']] },
+    trainerReturn: { text:'掌势可曾记牢？你我都遵循同样的修炼之道：修为进境，气血灵力随之增长，境界提升后拳劲、防御与回灵也会增长。打坐贵在恒久，切磋贵在体会。', choices:[['请指教，切磋一场。','startBattle'],['去打坐修炼。','openCultivation'],['稍后再来。','trainerBye']] },
+    trainerBye: { text:'好，练武贵在持之以恒。我就在听雨武馆门前，少侠随时可以来找我。', next:null },
   };
   function showNode(id) {
     currentNode=story[id]; typed=0; textClock=0;
@@ -101,7 +118,11 @@
           if(id==='startBattle') {
             closeDialogue();keys.clear();path=[];destination=null;pendingTalk=false;
             $('#interaction').hidden=true;battle.start(activeNpc.id);
-          } else showNode(id);
+          } else if(id==='learnMartial') {
+            if(martial.learn()){markStory('spar');cultivation.render();announce('习得推山掌与吐纳法 · 战斗按 2 施掌，地图按 R 修炼');}
+            showNode('trainerLearned');
+          } else if(id==='openCultivation'){closeDialogue();cultivation.open();}
+          else showNode(id);
         });
         $('#choices').append(button);
       }
@@ -119,8 +140,9 @@
     $('#speaker-name').textContent=person.name;
     $('.portrait-wrap img').src=person.src;
     $('.portrait-wrap img').alt=person.name;
-    $('.portrait-wrap span').textContent=person.role;
-    showNode(person===trainer?'trainer':completed?'return':'greeting');
+    $('#npc-identity').textContent=person.name+' · '+person.role.split(' · ').pop();
+    $('#npc-realm').textContent=Martial.person(person.id).realmName;
+    showNode(person===trainer?(martial.needsLesson?'trainerLesson':martial.learned?'trainerReturn':'trainer'):completed?'return':'greeting');
     $('#dialogue-next').focus({preventScroll:true});
   }
   function closeDialogue() {
@@ -146,7 +168,7 @@
   const nearNpc=(person)=>Math.hypot(hero.x-person.x,hero.y-person.y)<78&&Math.abs(VillageMap.surfaceAt(hero.x,hero.y).height-VillageMap.surfaceAt(person.x,person.y).height)<2;
   const closestNpc=()=>villagers.filter(nearNpc).sort((a,b)=>Math.hypot(hero.x-a.x,hero.y-a.y)-Math.hypot(hero.x-b.x,hero.y-b.y))[0];
   function requestTalk(person=npc) {
-    if(battle.active||storyView.active||bag.active)return;
+    if(battle.active||storyView.active||bag.active||cultivation.active)return;
     stopCollecting();
     if(nearNpc(person)) return openDialogue(person);
     const target=person.talk||{x:person.x,y:person.y+45};
@@ -156,9 +178,10 @@
   }
   $('#find-trainer').addEventListener('click',()=>requestTalk(trainer));
   $('#quest').addEventListener('click',()=>{
-    if(storyView.active||bag.active||battle.active||dialogueOpen)return;
+    if(storyView.active||bag.active||battle.active||dialogueOpen||cultivation.active)return;
     if(chronicle.next==='chief')requestTalk(npc);
-    else if(chronicle.next==='spar')requestTalk(trainer);
+    else if(['spar','practice'].includes(chronicle.next))requestTalk(trainer);
+    else if(chronicle.next==='meditate')cultivation.open();
     else if(chronicle.next==='flowers'){
       const node=Gathering.nodes.filter(n=>!keepsakes.remaining(n)).sort((a,b)=>Math.hypot(a.x-hero.x,a.y-hero.y)-Math.hypot(b.x-hero.x,b.y-hero.y))[0];
       if(node){chosenFlower=node;keys.clear();pendingTalk=false;path=flowerNear(node)?[]:findPath(hero,node);destination=path[path.length-1]||null;announce('走近花草后按 F 收集，再按 B 查看行囊。');}
@@ -176,11 +199,13 @@
   window.addEventListener('keydown',e=>{
     if(battle.active)return;
     if(storyView.active){storyView.handleKey(e);return;}
+    if(cultivation.active){cultivation.handleKey(e);return;}
     const key=e.key.toLowerCase();
     if(bag.active){
       bag.handleKey(e);
       return;
     }
+    if(!dialogueOpen&&key==='r'){e.preventDefault();if(!e.repeat)cultivation.open();return;}
     if(!dialogueOpen&&key==='b'){e.preventDefault();if(!e.repeat)bag.open();return;}
     if(!dialogueOpen&&key==='f'){e.preventDefault();if(!e.repeat)confirmFlower();return;}
     if(dialogueOpen) {
@@ -201,7 +226,7 @@
   window.addEventListener('blur',()=>keys.clear());
   document.addEventListener('visibilitychange',()=>{keys.clear();lastTime=0;if(document.hidden&&audioContext?.state==='running')audioContext.suspend();else if(!document.hidden&&soundOn)audioContext?.resume();});
   canvas.addEventListener('pointerdown',e=>{
-    if(dialogueOpen||battle.active||bag.active||storyView.active) return;
+    if(dialogueOpen||battle.active||bag.active||storyView.active||cultivation.active) return;
     stopCollecting();
     canvas.focus({preventScroll:true});
     const rect=canvas.getBoundingClientRect();
@@ -236,7 +261,7 @@
     hero.walking=false;
     if(battle.active){heroRun.reset();footDust.length=0;return;}
     if(storyView.active){heroRun.reset();return;}
-    if(bag.active){heroRun.reset();return;}
+    if(bag.active||cultivation.active){heroRun.reset();return;}
     for(let i=footDust.length-1;i>=0;i--) {
       footDust[i].life-=dt;if(footDust[i].life<=0)footDust.splice(i,1);
     }

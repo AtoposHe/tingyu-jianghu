@@ -28,7 +28,7 @@
       c.save();c.translate(point.x,y);c.scale(s*dir,s);if(side==='hero')c.rotate(recoil*.02);QSprites.draw(c,frame,QSprites.height);c.restore();
     }
     fx.foreground(c,{p,hitAt:profile.hitAt,actor:points.enemy,target:points.hero,dir:-1,s,time,w,h});
-    c.font='12px "Songti SC",serif';c.textAlign='center';c.fillStyle='#536e53';c.fillText('无名少侠',pos.hero.x,y+26);c.fillText('陆青山',pos.enemy.x,y+26);
+    c.font='12px "Songti SC",serif';c.textAlign='center';c.fillStyle='#536e53';c.fillText('无名少侠',pos.hero.x,y+26);c.fillText('武青山',pos.enemy.x,y+26);
     if(p>=profile.hitAt&&p<.9){c.font='bold 32px Georgia,serif';c.strokeStyle='#fff6de';c.lineWidth=5;c.fillStyle='#9d5728';const ty=Math.max(70,y-230*s-(p-profile.hitAt)*48);c.strokeText('−20',points.hero.x-22*s,ty);c.fillText('−20',points.hero.x-22*s,ty);}
     c.restore();
   }

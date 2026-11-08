@@ -75,3 +75,5 @@
 .portrait-link{margin-left:auto;text-decoration:none;color:#6b8167;font-size:10px;white-space:nowrap}.portrait-link:hover{color:#9b764f}@media(max-width:430px){.appearance-controls{flex-wrap:wrap;gap:7px}.portrait-link{margin-left:0;font-size:9px}.appearance-controls>span{display:none}}
 
 .appearance-note{font-size:9px;color:#8c967e;letter-spacing:0!important}.appearance-controls{flex-wrap:wrap}@media(max-width:650px){.appearance-note{display:none}}
+.skill-button.is-learned{background:#d8e6df;border-color:#85a89a;color:#375f53}.skill-button.is-learned small{color:#668778!important}.skill-button.is-learned .locked-mark{color:#527465;border-color:#a7bfb0}.skill-button.is-learned .action-icon{border-color:#a7bfb0}
+@media(max-width:1000px){.fighter-title{flex-wrap:wrap;row-gap:5px}.fighter-title small{display:block;flex-basis:100%;margin-left:28px;font-size:10px;letter-spacing:1px}}@media(max-width:650px){.fighter-title small{margin-left:0;font-size:9px;letter-spacing:0}}

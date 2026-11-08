@@ -5,14 +5,14 @@
   const clamp = (n, lo=0, hi=1) => Math.min(hi, Math.max(lo,n));
   const ease = t => 1-Math.pow(1-clamp(t),3);
   class SparringBattle {
-    constructor(onReturn) {
+    constructor(onReturn,progression=new Martial.Progression()) {
       this.root=document.querySelector('#battle');
       this.stage=document.querySelector('#battle-stage');
       this.canvas=document.querySelector('#battle-canvas');
       this.assetsReady=false;this.frameLoadError=false;this.hitPause=0;
       this.fx=new BattleFX();
       this.ctx=this.canvas.getContext('2d');
-      this.onReturn=onReturn;
+      this.onReturn=onReturn;this.progression=progression;
       this.active=false;this.state=null;this.motion=null;this.floaters=[];
       this.time=0;this.last=0;this.raf=0;this.wait=0;this.busy=false;
       this.background=null;this.sceneReady=false;this.sceneError=false;this.sceneVersion=0;this.opponentId='trainer';
@@ -20,6 +20,7 @@
       this.selectScene(this.opponentId);
       QSprites.load().then(()=>{this.assetsReady=true;if(this.active)this.sync();}).catch(()=>{this.frameLoadError=true;if(this.active)this.sync();});
       this.$('#attack-button').addEventListener('click',()=>this.attack());
+      this.$('#skill-button').addEventListener('click',()=>this.attack('skill'));
       this.$('#battle-yield').addEventListener('click',()=>this.yield());
       this.$('#battle-return').addEventListener('click',()=>this.leave());
       this.$('#battle-again').addEventListener('click',()=>this.start());
@@ -30,11 +31,12 @@
         if(!this.active)return;
         const result=this.$('#battle-result');
         if(!result.hidden && e.key==='Tab') {
-          const buttons=[...result.querySelectorAll('button')];
+          const buttons=[...result.querySelectorAll('button:not([hidden])')];
           const i=buttons.indexOf(document.activeElement);
           e.preventDefault();buttons[(i+(e.shiftKey?-1:1)+buttons.length)%buttons.length].focus();return;
         }
         if(e.key==='1'&&!e.repeat&&result.hidden){e.preventDefault();this.attack();}
+        if(e.key==='2'&&!e.repeat&&result.hidden){e.preventDefault();this.attack('skill');}
       });
     }
     selectScene(opponentId) {
@@ -57,11 +59,11 @@
     start(opponentId=this.opponentId) {
       cancelAnimationFrame(this.raf);
       this.selectScene(opponentId);
-      this.state=CombatRules.create();this.active=true;this.busy=false;
+      this.state=CombatRules.create(this.progression.hero,opponentId);this.hadSkill=this.progression.learned;this.active=true;this.busy=false;
       this.motion=null;this.floaters=[];this.wait=0;this.time=0;this.last=0;this.hitPause=0;
       this.root.hidden=false;this.root.closest('.game-frame').classList.add('in-battle');
       this.$('#battle-result').hidden=true;this.$('#combat-log').replaceChildren();
-      this.log('切磋开始。双方状态已重置，你先出招。');
+      this.log(`切磋开始。${this.state.hero.realmName}对${this.state.enemy.realmName}，双方气血、灵力回满。每整回合结束双方各自回灵。`);
       this.resize();this.sync();this.callout('你的回合 · 以拳入江湖');
       this.$('#attack-button').focus({preventScroll:true});
       this.raf=requestAnimationFrame(t=>this.frame(t));
@@ -95,25 +97,36 @@
           this.$(`#${side}-${stat}`).textContent=`${actor[stat]} / ${max}`;
           this.$(`#${side}-${stat}-bar`).style.width=`${actor[stat]/max*100}%`;
           this.$(`#${side}-${stat}-meter`).setAttribute('aria-valuenow',String(actor[stat]));
+          this.$(`#${side}-${stat}-meter`).setAttribute('aria-valuemax',String(max));
         }
+        this.$(`#${side}-realm`).textContent=`${actor.realmName} · 回灵 ${actor.regen}`;
       }
       this.$('#battle-round').textContent=String(this.motion?.round ?? this.state.round);
       this.stage.classList.toggle('skill-active',this.motion?.action==='skill');
       const ready=this.assetsReady&&this.sceneReady&&!this.busy&&this.state.phase==='player';
       this.$('#attack-button').disabled=!ready;
+      const learned=this.state.hero.skills.includes('mountain'),skill=Martial.skills.mountain;
+      this.$('#skill-button').disabled=!ready||!CombatRules.canSkill(this.state.hero);
+      this.$('#skill-button').classList.toggle('is-learned',learned);
+      this.$('#skill-name').textContent=learned?skill.name:'技能攻击';
+      this.$('#skill-hint').textContent=learned?`消耗 ${skill.cost} 灵力 · 护势减伤 60%`:'尚未习得 · 落败后请教武师';
+      this.$('#skill-key').textContent=learned?'2':'锁';
+      this.$('#skill-button').title=learned?(this.state.hero.mp<skill.cost?'灵力不足；整回合结束会恢复灵力':'沉肩护势，抵挡下一次攻击的 60% 伤害'):'尚未习得技能';
+      this.$('#battle-tip').textContent=`每整回合结束：少侠回灵 ${this.state.hero.regen}、武师回灵 ${this.state.enemy.regen}；推山掌消耗 ${skill.cost} 灵力，并护势抵挡下一击 60% 伤害。`;
       this.$('#battle-yield').disabled=this.busy||!['player','enemy'].includes(this.state.phase);
       this.$('#battle-phase').textContent=this.busy?(this.motion?.side==='hero'?'少侠出招':'武师回合'):!this.assetsReady||!this.sceneReady?'正在入场':ready?'你的回合':'切磋结束';
       this.$('#turn-hint').textContent=this.frameLoadError?'素材加载失败，请刷新':!this.assetsReady?'正在载入Q版素材':!this.sceneReady?'正在载入战斗场景':ready?'请选择行动':this.busy?'招式进行中':'切磋结束';
     }
-    attack() {
+    attack(action='normal') {
       if(!this.active||!this.assetsReady||!this.sceneReady||this.busy||this.state.phase!=='player')return;
-      this.begin('hero','normal');
+      if(action==='skill'&&!CombatRules.canSkill(this.state.hero))return;
+      this.begin('hero',action);
     }
     begin(side,action) {
       this.busy=true;this.wait=0;
       const profile=BattleMoves.choose(side,action);
       this.motion={side,action,profile,round:this.state.round,t:0,duration:profile.duration,hit:false};
-      this.callout(side==='hero'?'无名少侠 · 直拳':action==='skill'?'陆青山 · 推山掌':'陆青山 · 试探拳');
+      this.callout(`${this.state[side].name} · ${profile.name}`);
       this.sync();
     }
     hit() {
@@ -123,10 +136,12 @@
       if(m.action==='skill')this.hitPause=.075;
       this.floaters.push({big:m.action==='skill',side:target,text:`−${outcome.damage}`,type:'damage',t:0});
       if(outcome.mpChange) this.floaters.push({side:m.side,text:`灵力 ${outcome.mpChange>0?'+':''}${outcome.mpChange}`,type:'mana',t:0});
-      const actor=m.side==='hero'?'少侠':'陆青山';
-      const victim=m.side==='hero'?'陆青山':'少侠';
-      const energy=outcome.mpChange===0?'灵力已满':outcome.mpChange>0?`灵力 +${outcome.mpChange}`:`消耗 ${-outcome.mpChange} 灵力`;
-      this.log(`第${round}回合 · ${actor}使出${outcome.move}，${victim}气血 −${outcome.damage}；${energy}。`);
+      if(outcome.guarded)this.floaters.push({side:target,text:'护势 · 减伤 60%',type:'guard',t:0});
+      for(const recovery of outcome.recovery)if(recovery.amount)this.floaters.push({side:recovery.side,text:`回灵 +${recovery.amount}`,type:'mana',t:-.5});
+      const actor=this.state[m.side].name,victim=this.state[target].name;
+      const energy=outcome.mpChange?`；消耗 ${-outcome.mpChange} 灵力，立起护势`:'';
+      this.log(`第${round}回合 · ${actor}使出${outcome.move}，${victim}气血 −${outcome.damage}${outcome.guarded?'（护势减伤）':''}${energy}。`);
+      if(outcome.recovery.length)this.log(`回合结束 · ${outcome.recovery.map(r=>`${this.state[r.side].name}回灵 +${r.amount}`).join('，')}。`);
       const card=this.$(target==='hero'?'.hero-card':'.enemy-card');
       card.classList.remove('is-hit');void card.offsetWidth;card.classList.add('is-hit');
       this.sync();
@@ -134,13 +149,18 @@
     finish(kind) {
       this.busy=false;this.motion=null;this.wait=0;
       this.state.phase=kind;
+      this.progression.recordBattle(kind,this.hadSkill);
       this.$('#battle-result').hidden=false;
       const title=kind==='victory'?'切磋获胜':kind==='defeat'?'胜败乃兵家常事':'承让，下次再会';
       this.$('#result-title').textContent=title;
       this.$('#result-message').textContent=kind==='victory'
-        ?`经过 ${this.state.round} 回合，你以一双拳头赢得了陆青山的认可。剩余气血 ${this.state.hero.hp}，灵力 ${this.state.hero.mp}。`
-        :kind==='defeat'?'陆青山及时收招：“根基尚浅，不必气馁。下次再来，我仍在这里等你。”'
-        :'你抱拳认输，陆青山收势回礼：“切磋不争一时，随时再来。”';
+        ?`经过 ${this.state.round} 回合，你凭修炼与拳掌赢得了武青山的认可。剩余气血 ${this.state.hero.hp}，灵力 ${this.state.hero.mp}。`
+        :kind==='defeat'?(this.progression.needsLesson
+          ?`第 ${this.state.round} 回合，武青山及时收掌：“你的根基尚浅，只靠蛮力撑不了多久。我传你一式推山掌，再教你打坐吐纳。灵力须一点点积累。”返回后向他请教。`
+          :`交手 ${this.state.round} 回合后，武青山扶你站稳：“掌势已会，根基仍有差距。沉肩护住中门，日常打坐勤积灵力，切莫急求速成。”`)
+        :'你抱拳认输，武青山收势回礼：“先认真交手，再谈根基。准备好随时来。”';
+      this.$('#battle-again').hidden=this.progression.needsLesson;
+      this.$('#battle-return').textContent=this.progression.needsLesson?'向武师请教 ↗':'返回听雨村 ↗';
       this.log(title+'。返回村庄后不保留切磋伤势。');this.callout('点到即止 · 以武会友');this.sync();
       this.$('#battle-return').focus({preventScroll:true});
     }
@@ -148,7 +168,7 @@
     leave() {
       if(!this.active)return;
       this.active=false;cancelAnimationFrame(this.raf);this.motion=null;
-      this.root.hidden=true;this.root.closest('.game-frame').classList.remove('in-battle');this.onReturn(this.state.phase);
+      this.root.hidden=true;this.root.closest('.game-frame').classList.remove('in-battle');this.onReturn(this.state.phase,this.hadSkill);
     }
     frame(now) {
       if(!this.active)return;
@@ -202,6 +222,10 @@
         const x=pos[side].x+(active?dir*pose.travel*distance*(m.action==='skill' ? .16 : 1):0)-dir*push+shake;
         const y=pos[side].y+(active?-Math.sin(pose.travel*Math.PI)*3:Math.sin(this.time*2)*.7);
         points[side]={x,y};
+        if(this.state[side].guard>0){
+          c.save();c.strokeStyle='#78a89b99';c.lineWidth=2;c.globalAlpha=.6+Math.sin(this.time*3)*.15;
+          c.beginPath();c.ellipse(x,y-90*pos.scale,53*pos.scale,96*pos.scale,0,0,Math.PI*2);c.stroke();c.restore();
+        }
         c.fillStyle='#3e59432c';c.beginPath();c.ellipse(x,y+2,43*pos.scale,10*pos.scale,0,0,Math.PI*2);c.fill();
         if(active&&pose.travel>0&&p<profile.hitAt-.05) {
           for(let trail=2;trail>0;trail--) {
@@ -220,14 +244,15 @@
       if(m)this.effects(m,p,pose,pos,points);
       for(const side of ['hero','enemy']) {
         c.font='11px "Songti SC",serif';c.textAlign='center';c.fillStyle='#344c3b';c.strokeStyle='#fff7df';c.lineWidth=3;
-        const label=side==='hero'?'无名少侠 · 徒手':'陆青山 · 拳掌';c.strokeText(label,pos[side].x,pos[side].y+24);c.fillText(label,pos[side].x,pos[side].y+24);
+        const label=`${this.state[side].name} · ${this.state[side].skills.length?'拳掌':'徒手'}`;c.strokeText(label,pos[side].x,pos[side].y+24);c.fillText(label,pos[side].x,pos[side].y+24);
       }
       for(const f of this.floaters) {
+        if(f.t<0)continue;
         const point=pos[f.side];
         c.save();c.globalAlpha=clamp((1.3-f.t)*2);c.textAlign='center';
         c.font=f.type==='damage'?(f.big?'bold 35px Georgia,serif':'bold 27px Georgia,serif'):'bold 12px "Songti SC",serif';
-        c.fillStyle=f.type==='damage'?(f.big?'#995825':'#a34e37'):'#3a8393';c.strokeStyle='#fcf6e7';c.lineWidth=4;
-        const y=Math.max(48,point.y-(f.type==='damage'?230:181)*pos.scale-f.t*24);
+        c.fillStyle=f.type==='damage'?(f.big?'#995825':'#a34e37'):f.type==='guard'?'#637946':'#3a8393';c.strokeStyle='#fcf6e7';c.lineWidth=4;
+        const y=Math.max(48,point.y-(f.type==='damage'?230:f.type==='guard'?205:181)*pos.scale-f.t*24);
         const x=point.x+(f.type==='damage'?-28:35)*pos.scale;
         c.strokeText(f.text,x,y);c.fillText(f.text,x,y);c.restore();
       }
