@@ -77,11 +77,13 @@
   function markStory(flag){chronicle.mark(flag);storyView.render();}
   function flowerNear(node){return Math.hypot(hero.x-node.x,hero.y-node.y)<66&&Math.abs(worldMap.surfaceAt(hero.x,hero.y).height-worldMap.surfaceAt(node.x,node.y).height)<2&&worldMap.canStep(hero,node);}
   function nearestFlower(){return chosenFlower&&flowerNear(chosenFlower)?chosenFlower:(worldMap===VillageMap?Gathering.nodes:[]).filter(flowerNear).sort((a,b)=>Math.hypot(a.x-hero.x,a.y-hero.y)-Math.hypot(b.x-hero.x,b.y-hero.y))[0];}
+  const futureExit=()=>worldMap===ForestMap?ForestMap.exits.find(exit=>Math.hypot(hero.x-exit.x,hero.y-exit.y)<55):null;
+  function inspectExit(){const exit=futureExit();if(!exit)return false;announce(`${exit.name} · 前路未开放，日后可由此进入新的区域。`);return true;}
   function syncFlower(){
     const blocked=dialogueOpen||battle.active||bag.active||storyView.active||cultivation.active||smithy.active||doctor.active||health.active,nearby=closestNpc(),talk=$('#interaction'),flower=$('#gather-prompt');
-    const node=worldMap===VillageMap?nearestFlower():nearestResource();const gate=worldMap===VillageMap?{x:552,y:950}:ForestMap.portal;const nearGate=Math.hypot(hero.x-gate.x,hero.y-gate.y)<39;
-    talk.hidden=blocked||(!nearby&&(!nearGate||!!node));flower.hidden=blocked||!!nearby||!node;
-    const key=nearby?.id||(nearGate?'portal':'');if(talk.dataset.npc!==key){talk.dataset.npc=key;const kbd=document.createElement('kbd');kbd.textContent='E';talk.replaceChildren(kbd,document.createTextNode(nearby?` 与${nearby.name}交谈`:` ${worldMap===VillageMap?'南行进入听雨林':'北行返回听雨村'}`));}
+    const node=worldMap===VillageMap?nearestFlower():nearestResource();const gate=worldMap===VillageMap?{x:552,y:950}:ForestMap.portal;const nearGate=Math.hypot(hero.x-gate.x,hero.y-gate.y)<39,sideExit=futureExit();
+    talk.hidden=blocked||(!nearby&&(!nearGate&&!sideExit||!!node));flower.hidden=blocked||!!nearby||!node;
+    const key=nearby?.id||(sideExit?sideExit.id:nearGate?'portal':'');if(talk.dataset.npc!==key){talk.dataset.npc=key;const kbd=document.createElement('kbd');kbd.textContent='E';talk.replaceChildren(kbd,document.createTextNode(nearby?` 与${nearby.name}交谈`:sideExit?` ${sideExit.name} · 前路未开放`:` ${worldMap===VillageMap?'南行进入听雨林':'北行返回听雨村'}`));}
     if(!node)return;const remaining=worldMap===VillageMap?keepsakes.remaining(node):node.kind==='ore'?economy.remaining(node.id):0,name=worldMap===VillageMap?Gathering.items[node.item].name:node.kind==='ore'?Forge.ores[node.ore].name:Forge.herbs[node.herb].name;
     $('#gather-label').textContent=remaining?`${name} · 再生 ${remaining} 秒`:`采集 · ${name}`;flower.disabled=remaining>0;
   }
@@ -95,7 +97,7 @@
     syncFlower();
   }
   $('#gather-prompt').onclick=confirmFlower;
-  $('#interaction').onclick=()=>{const person=closestNpc();if(person)openDialogue(person);else requestTravel(worldMap===VillageMap?'forest':'village');};
+  $('#interaction').onclick=()=>{const person=closestNpc();if(person)openDialogue(person);else if(!inspectExit())requestTravel(worldMap===VillageMap?'forest':'village');};
   function announce(text) {
     clearTimeout(toastTimer);
     $('#announcement').textContent=text;
@@ -255,7 +257,7 @@
     }
     if(document.activeElement?.tagName==='BUTTON'&&document.activeElement.id!=='gather-prompt') return;
     if(movementKeys.includes(key)) { e.preventDefault();stopCollecting(); keys.add(key); path=[]; destination=null; pendingTalk=false;pendingTravel=null; }
-    if((key==='e'||key===' ') && !e.repeat) {e.preventDefault(); const person=closestNpc();if(person) openDialogue(person);else if(Math.hypot(hero.x-552,hero.y-(worldMap===VillageMap?950:130))<40)requestTravel(worldMap===VillageMap?'forest':'village'); else announce('走近人物即可交谈，也可点击“寻访武师”切磋。');}
+    if((key==='e'||key===' ') && !e.repeat) {e.preventDefault(); const person=closestNpc();if(person) openDialogue(person);else if(inspectExit())return;else if(Math.hypot(hero.x-552,hero.y-(worldMap===VillageMap?950:130))<40)requestTravel(worldMap===VillageMap?'forest':'village'); else announce('走近人物即可交谈，也可点击“寻访武师”切磋。');}
   });
   window.addEventListener('keyup',e=>keys.delete(e.key.toLowerCase()));
   window.addEventListener('blur',()=>keys.clear());
@@ -419,6 +421,7 @@
       if(prop.label){ctx.font='12px "Songti SC",serif';ctx.textAlign='center';ctx.lineWidth=3;ctx.strokeStyle='#f5eed8';ctx.fillStyle='#4d5036';ctx.strokeText(prop.label,prop.box[0]+prop.box[2]/2,prop.depth+14);ctx.fillText(prop.label,prop.box[0]+prop.box[2]/2,prop.depth+14);}
     }});
     const gate=worldMap===VillageMap?{x:552,y:950}:ForestMap.portal;ctx.font='13px \"Songti SC\",serif';ctx.textAlign='center';ctx.strokeStyle='#f5edd1';ctx.lineWidth=3;ctx.fillStyle='#5f7054';const gateLabel=worldMap===VillageMap?'↓ 南行 · 听雨林':'↑ 北行 · 听雨村';ctx.strokeText(gateLabel,gate.x,gate.y+10);ctx.fillText(gateLabel,gate.x,gate.y+10);
+    if(worldMap===ForestMap){ctx.font='12px \"Songti SC\",serif';ctx.lineWidth=4;ctx.strokeStyle='#f5edd1';ctx.fillStyle='#5c6a51';for(const exit of ForestMap.exits){ctx.textAlign=exit.id==='west'?'left':'right';const label=(exit.id==='west'?'← ':'')+exit.name+(exit.id==='east'?' →':'');ctx.strokeText(label,exit.x,exit.y-30);ctx.fillText(label,exit.x,exit.y-30);}}
     actors.sort((a,b)=>a.y-b.y).forEach(a=>a.draw());
     // A handful of drifting leaves provide motion without external media.
     for(let i=0;i<9;i++) {

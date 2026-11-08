@@ -88,12 +88,13 @@ async function run(){
   element('#outskirts-toggle').onclick();advance(1500);assert.equal(element('#game').dataset.map,'forest','The south road changes to an actual second map');
   assert.equal(element('#map-name').textContent,'听雨林');
   // Current camera is at x=0 near the western entrance; canvas covers the 1600x1100 world without letterboxing.
-  element('#game').pointerdown({clientX:300*.8,clientY:(790-55)*.8});advance(1200);
+  element('#game').pointerdown({clientX:220*.8,clientY:(570-55)*.8});advance(1200);
   assert.equal(new Forge.ForgeState(context.localStorage).ores.iron,0,'Walking to a mine never auto-collects');key('f');assert.equal(new Forge.ForgeState(context.localStorage).ores.iron,1);key('f');assert.equal(new Forge.ForgeState(context.localStorage).ores.iron,1,'Repeated F respects persistent mine cooldown');
   element('#find-doctor').onclick();advance(1200);assert.equal(element('#doctor').hidden,false,'Doctor is reachable through the bamboo grove');
   assert.equal(element('#doctor-realm').textContent,'通脉二段');key('Escape');key('c');assert.equal(element('#health').hidden,false);
   element('#hero-name-input').value='听雨客';element('#hero-name-save').onclick();assert.equal(element('#map-hero-name').textContent,'听雨客');assert.equal(new Forge.ForgeState(context.localStorage).heroName,'听雨客');
-  key('Escape');element('#outskirts-toggle').onclick();advance(1500);assert.equal(element('#game').dataset.map,'village','The north forest path returns to the village');
+  key('Escape');element('#game').pointerdown({clientX:20*.8,clientY:585*.8});advance(1500);assert.match(element('#interaction').children.map(c=>c.textContent||'').join(''),/西行山道/);key('e');assert.match(element('#announcement').textContent,/前路未开放/);assert.equal(element('#game').dataset.map,'forest','Future side exits do not send players back to the village');
+  element('#outskirts-toggle').onclick();advance(1500);assert.equal(element('#game').dataset.map,'village','The north forest path returns to the village');
   console.log('PASS real input/update: instant F collection, prompt priority, chief route/dialogue, cooldown and saved inventory');
 }
 module.exports=run();

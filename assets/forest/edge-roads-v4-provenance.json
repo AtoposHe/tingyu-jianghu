@@ -1,0 +1,14 @@
+{
+  "tool": "built-in image_gen",
+  "assets": [
+    {
+      "path": "assets/maps/forest-v4.png",
+      "prompt": "Use case: precise-object-edit. Asset type: final wuxia forest RPG map background.\nEdit the supplied map with ONLY these route extensions. Preserve the exact existing hand-painted style, natural turquoise stream, cascades, stone paths, open clinic courtyard and platform, greenery, existing path network, and all existing route positions. No overall redesign.\n1. WEST EXIT: extend the stone path from the small western circular stone turnout at approximately x14%, y52% LEFT through a tasteful narrow gap in the rock/bamboo border, all the way to touch the LEFT EDGE at x0%, y53%. It is a complete continuous cobblestone walking trail about 5.5% of image width thick. The entire crossing of the perimeter is clear stone paving, not blocked by bamboo, roots, boulders or fences. The view should suggest the road continues into an unseen western region.\n2. EAST EXIT: add a similarly narrow continuous cobblestone side trail branching from the far eastern north-south stone path around x89%, y56%, running RIGHT through a natural break in the rocky wooded boundary, and TOUCHING THE RIGHT EDGE at x100%, y56%. No obstruction at the border. It suggests a future eastern region beyond the map.\nKeep the path surface, stone curbs, moss and natural trail-edge vegetation consistent with the original village-style paving. Do not widen the remaining paths or turn forest into empty plazas. Leave the top entrance unchanged. DO NOT add text, icons, sign writing, buildings, people, fences or new bridges. Both added trails must visibly reach and cross their respective image edges, not stop short or dead-end at a rock. Output same landscape composition and preserve all other geometry.",
+      "transparent": false,
+      "references": [
+        "docs/map-design/forest-v3-draft.png"
+      ]
+    }
+  ],
+  "notes": "Final runtime map, original village style retained, west and east paths reach their map edges. Navigation calibrated to final painting."
+}
