@@ -14,3 +14,6 @@ for(const target of [map.elder,map.elder.talk,{x:1376,y:632}]){
 }
 assert.equal(map.props.filter(p=>p.label==='村长家').length,1);
 console.log('PASS correct house label, fixed house position, east-side forge and chief doorstep');
+
+assert.ok(map.smith.x<forge.box[0]-20,"Smith stands outside the west-facing PNG silhouette rather than behind the building");
+assert.ok(map.findPath(map.spawn,map.smith.talk).length);assert.ok(map.findPath(map.trainer.talk,map.smith.talk).length);

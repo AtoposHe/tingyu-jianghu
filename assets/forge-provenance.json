@@ -1,0 +1,48 @@
+{
+  "tool": "built-in image_gen",
+  "assets": [
+    {
+      "id": "smith",
+      "path": "assets/q/blacksmith.png",
+      "transparent": true,
+      "prompt": "Hand-painted guofeng Chinese wuxia chibi game art matching the supplied hero style reference. Crisp delicate warm outlines, detailed fabric and materials, large head small body, polished 2D game sprite. STYLE REFERENCE ONLY, design a DIFFERENT character: a friendly sturdy middle-aged Jiangnan village blacksmith, sun-tanned face, thick eyebrows, short dark beard, hair tied with a grey cloth band, sleeveless rolled indigo work jacket, cream inner shirt, heavy warm brown leather apron with soot marks, tool belt, dark trousers and boots. Standing full body in three-quarter view facing left, one complete hand holding a small forging hammer resting downward, other complete hand relaxed visible. Broad shoulders and strong forearms but gentle smile. Every hand and foot fully visible. Single character centered on genuinely transparent background, no anvil, no scenery, no text, no effects.",
+      "reference": "assets/q/hero-idle.png"
+    },
+    {
+      "id": "slash",
+      "path": "assets/q/hero-slash.png",
+      "transparent": true,
+      "prompt": "Hand-painted guofeng Chinese wuxia chibi game art matching the supplied hero style reference. Crisp delicate warm outlines, detailed fabric and materials, large head small body, polished 2D game sprite. IDENTITY REFERENCE: preserve EXACT same young male hero brown ponytail topknot gold jade crown, teal and white robe gold cloud embroidery bamboo ink front panel jade pendant red tassel and boots. New dynamic full body swordsman downward-cut follow-through key pose facing right. Wider planted stance, torso leaning slightly forward, dominant right forearm extended forward and angled down, dominant right hand CLOSED AROUND AN EMPTY SWORD GRIP at chest height to the RIGHT of the body, other complete arm drawn back for balance. IMPORTANT NO SWORD, NO WEAPON, NO PROP is drawn: the game will attach a separate sword sprite into that closed gripping hand. Draw a physically plausible grip with thumb and all fingers curled, and arm posed clearly as cutting not punching. Full body, both arms and both legs, no cropped hair or boots. Genuine transparent background, no effects, no scenery, no text.",
+      "reference": "assets/q/hero-idle.png"
+    },
+    {
+      "id": "wood",
+      "path": "assets/weapons/wood.png",
+      "transparent": true,
+      "prompt": "Hand-painted Chinese wuxia game inventory weapon sprite. Exactly ONE simple wooden training jian sword made of warm honey brown wood with visible subtle grain, dark brown cloth-wrapped handle and compact straight wooden crossguard, no tassel. Entire sword centered vertically, blade pointing STRAIGHT UP, pommel at bottom. Flat face-on orthographic view, symmetrical straight double edged sword silhouette, blade, crossguard and handle all visible, no perspective rotation. Long slim blade and short practical handle. Use most of the height with transparent padding all around. Genuine transparent background. No hands, no person, no shadow, no aura, no text, no other object.",
+      "reference": null
+    },
+    {
+      "id": "qingfeng",
+      "path": "assets/weapons/qingfeng.png",
+      "transparent": true,
+      "prompt": "Hand-painted Chinese wuxia game inventory weapon sprite, polished guofeng fantasy illustration. Exactly ONE Qingfeng straight jian sword, slender bright silver steel double edged blade with faint cool jade reflected edge, small brass cloud-shaped crossguard, dark teal cloth wrapped grip, brass pommel set with small green jade, no tassel. Entire sword centered vertically, blade pointing STRAIGHT UP, pommel bottom. Flat face-on orthographic view with symmetrical straight blade, zero perspective rotation. Blade, crossguard and handle all fully visible with transparent padding. Genuine transparent background. No hands, no person, no shadow, no aura, no text, no other object.",
+      "reference": null
+    },
+    {
+      "id": "steel",
+      "path": "assets/weapons/steel.png",
+      "transparent": true,
+      "prompt": "Hand-painted Chinese wuxia game inventory weapon sprite, polished guofeng illustration. Exactly ONE forged refined-iron long jian sword, broader dark gunmetal silver double edged blade with a clear bright central ridge, angular black iron guard with small copper inlays, burgundy leather wrapped handle and faceted dark steel pommel, no tassel. Entire sword centered vertically, blade pointing STRAIGHT UP, pommel at bottom. Flat face-on orthographic view, symmetrical straight sword, zero perspective rotation. Blade, crossguard and handle all fully visible with transparent padding. Genuine transparent background. No hands, no person, no shadow, no aura, no text, no other object.",
+      "reference": null
+    },
+    {
+      "id": "outskirts",
+      "path": "assets/maps/outskirts.png",
+      "transparent": false,
+      "prompt": "A beautiful hand-painted Chinese wuxia guofeng 2D game exploration background, wide horizontal composition. A small peaceful rocky hillside OUTSIDE a Jiangnan village in late spring, elevated three-quarter top-down game map view. Winding pale dirt footpath from bottom center to upper left, low mossy rocks on either side, weathered layered rock ledges on the right, several small natural iron ore seams with cool grey metallic flecks around lower left, copper-bearing warm rusty orange stone around middle right. Green bamboo and willow at edges, a distant village roof and soft misty hills above, a tiny wooden footbridge over a stream upper left. Rich layered detail but a clean WALKABLE OPEN path with space for clickable mining markers. No people, no monsters, no buildings in foreground, no icons, no labels, no text, no interface. Match delicate muted warm watercolor-and-ink game art, daylight, tranquil exploration.",
+      "reference": null
+    }
+  ],
+  "notes": "Original raster pixels preserved. Character and weapons are composed and animated at runtime; alpha metadata is read by the inspector."
+}

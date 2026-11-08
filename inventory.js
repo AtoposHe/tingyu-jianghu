@@ -1,7 +1,7 @@
 (() => {
   class InventoryView {
-    constructor(store,onToggle,progression,onMethodChange=()=>{}) {
-      this.store=store;this.onToggle=onToggle;this.root=document.querySelector('#inventory');this.selected=null;this.pendingDiscard=null;this.progression=progression;this.onMethodChange=onMethodChange;this.tab='items';this.reading=null;
+    constructor(store,onToggle,progression,onMethodChange=()=>{},economy=null,onGearChange=()=>{}) {
+      this.store=store;this.onToggle=onToggle;this.root=document.querySelector('#inventory');this.selected=null;this.pendingDiscard=null;this.progression=progression;this.onMethodChange=onMethodChange;this.tab='items';this.reading=null;this.economy=economy;this.onGearChange=onGearChange;
       document.querySelector('#bag-toggle').onclick=()=>this.open();document.querySelector('#bag-close').onclick=()=>this.close();
       this.root.addEventListener('click',e=>{if(e.target===this.root)this.close();});
       document.querySelector('#discard-confirm').onclick=()=>this.confirmDiscard();
@@ -12,16 +12,16 @@
       document.querySelector('#book-use').onclick=()=>{if(this.progression?.selectMethod(this.reading)){this.onMethodChange();this.renderBooks();}};
     }
     get active(){return !this.root.hidden;}
-    open(){this.onToggle();this.pendingDiscard=null;document.querySelector('#bag-feedback').textContent='';this.root.hidden=false;this.render();document.querySelector('#bag-close').focus({preventScroll:true});}
+    open(){if(this.onToggle()===false)return;this.pendingDiscard=null;document.querySelector('#bag-feedback').textContent='';this.root.hidden=false;this.render();document.querySelector('#bag-close').focus({preventScroll:true});}
     close(){this.cancelDiscard();this.root.hidden=true;document.querySelector('#game').focus({preventScroll:true});}
     switchTab(tab){this.tab=tab;this.reading=null;this.cancelDiscard();this.render();document.querySelector(tab==='items'?'#bag-items-tab':'#bag-books-tab').focus({preventScroll:true});}
     closeBook(){const id=this.reading;this.reading=null;this.renderBooks();document.querySelector(`[data-book-id="${id}"]`)?.focus({preventScroll:true});}
     cancelDiscard(){this.pendingDiscard=null;document.querySelector('#discard-menu').hidden=true;}
-    requestDiscard(id){if(!this.store.counts[id])return;document.querySelector('#bag-feedback').textContent='';this.selected=id;this.pendingDiscard=id;this.render();document.querySelector('#discard-confirm').focus({preventScroll:true});}
+    requestDiscard(id){if(!this.item(id)?.count)return;document.querySelector('#bag-feedback').textContent='';this.selected=id;this.pendingDiscard=id;this.render();document.querySelector('#discard-confirm').focus({preventScroll:true});}
     confirmDiscard(){
       const id=this.pendingDiscard;if(!id)return;
-      const removed=this.store.discard(id,1);this.cancelDiscard();this.render();
-      document.querySelector('#bag-feedback').textContent=removed?`已丢弃 ${Gathering.items[id].name} ×1`:'物品数量已变化，请重新选择。';
+      const item=this.item(id),parts=id.split(':'),removed=parts.length>1?this.economy.discard(parts[0],parts[1]):this.store.discard(id,1);this.cancelDiscard();if(removed)this.onGearChange();this.render();
+      document.querySelector('#bag-feedback').textContent=removed?`已丢弃 ${item.name} ×1`:'物品数量已变化，请重新选择。';
       document.querySelector('#bag-close').focus({preventScroll:true});
     }
     handleKey(e){
@@ -31,6 +31,13 @@
       if(key==='escape'&&this.pendingDiscard){e.preventDefault();this.cancelDiscard();document.querySelector('#bag-close').focus({preventScroll:true});return;}
       if(key==='escape'||key==='b'){e.preventDefault();if(!e.repeat)this.close();return;}
       if(key==='tab'){const buttons=[...this.root.querySelectorAll('button')].filter(b=>!b.closest('[hidden]'));const i=buttons.indexOf(document.activeElement);e.preventDefault();buttons[(i+(e.shiftKey?-1:1)+buttons.length)%buttons.length]?.focus();}
+    }
+    item(id){
+      if(!id)return null;
+      const [kind,key]=id.split(':');
+      if(kind==='ore'&&this.economy&&Object.hasOwn(Forge.ores,key)){const ore=Forge.ores[key];return {...ore,count:this.economy.ores[key],ore:key,kind:'锻造矿石',description:'村外采集所得，可交给铁师傅锻造武器，也可在铁铺出售。'};}
+      if(kind==='weapon'&&this.economy&&Object.hasOwn(Forge.weapons,key)){const weapon=Forge.weapons[key];return {...weapon,count:this.economy.weapons[key],weapon,kind:`兵器 · 武力 +${weapon.attack}`};}
+      const item=Gathering.items[id];return item?{...item,count:this.store.counts[id],src:`assets/town/${item.art}.png`}:null;
     }
     renderBooks(){
       const ids=this.progression?.manualIds||[],grid=document.querySelector('#manual-grid');grid.replaceChildren();
@@ -61,21 +68,26 @@
       document.querySelector('#bag-items').hidden=isBooks;document.querySelector('#bag-books').hidden=!isBooks;
       document.querySelector('#bag-item-hint').hidden=isBooks;
       this.renderBooks();
+      document.querySelector('#bag-gold').textContent=String(this.economy?.gold||0);
+      document.querySelector('#bag-equipped').textContent=this.economy?.equipped?`当前装备 · ${this.economy.equipped.name}（武力 +${this.economy.equipped.attack}）`:'当前装备 · 徒手';
       const entries=Object.keys(Gathering.items).filter(id=>this.store.counts[id]);
+      if(this.economy){for(const id of Object.keys(Forge.ores))if(this.economy.ores[id])entries.push('ore:'+id);for(const id of Object.keys(Forge.weapons))if(this.economy.weapons[id])entries.push('weapon:'+id);}
       if(!entries.includes(this.selected))this.selected=entries[0]||null;
-      document.querySelector('#bag-summary').textContent=isBooks?`已学典籍 · ${this.progression?.manualIds.length||0} 部 · 不占物品格`:`花卉收藏 · ${entries.length} 种 · 共 ${this.store.total} 件`;
-      document.querySelector('#bag-count').textContent=this.store.total;
+      const total=this.store.total+(this.economy?.total||0);
+      document.querySelector('#bag-summary').textContent=isBooks?`已学典籍 · ${this.progression?.manualIds.length||0} 部 · 不占物品格`:`物品材料 · ${entries.length} 种 · 共 ${total} 件`;
+      document.querySelector('#bag-count').textContent=total;
       const grid=document.querySelector('#bag-grid');grid.replaceChildren();
-      for(const id of entries){const item=Gathering.items[id],b=document.createElement('button');b.className='bag-slot';b.type='button';b.setAttribute('aria-pressed',String(id===this.selected));b.setAttribute('aria-label',`${item.name}，${this.store.counts[id]} 件`);
-        b.innerHTML=`<img src="assets/town/${item.art}.png" alt=""><span>${item.name}</span><b>×${this.store.counts[id]}</b>`;
+      for(const id of entries){const item=this.item(id),b=document.createElement('button');b.className='bag-slot';b.type='button';b.setAttribute('aria-pressed',String(id===this.selected));b.setAttribute('aria-label',`${item.name}，${item.count} 件`);
+        b.innerHTML=`${item.src?`<img src="${item.src}" alt="">`:`<span class="ore-icon ${item.ore}">矿</span>`}<span>${item.name}</span><b>×${item.count}</b>`;
         b.onclick=()=>{this.cancelDiscard();this.selected=id;this.render();grid.querySelector(`[aria-label^="${item.name}"]`)?.focus();};
         b.oncontextmenu=e=>{e.preventDefault();this.requestDiscard(id);};grid.append(b);}
       for(let i=entries.length;i<12;i++){const slot=document.createElement('div');slot.className='bag-slot empty';slot.setAttribute('aria-hidden','true');grid.append(slot);}
-      const detail=document.querySelector('#bag-detail'),item=Gathering.items[this.selected];
-      detail.innerHTML=item?`<img src="assets/town/${item.art}.png" alt="${item.name}"><h3>${item.name}</h3><p>花卉收藏 · 拥有 ${this.store.counts[this.selected]} 件</p><p>${item.description}</p>`:'<h3>行囊待满</h3><p>靠近路边花草，按 F 收集花朵或落瓣。它们会在这里留下江南的颜色。</p>';
+      const detail=document.querySelector('#bag-detail'),item=this.item(this.selected);
+      detail.innerHTML=item?`${item.src?`<img src="${item.src}" alt="${item.name}">`:`<span class="ore-icon ${item.ore}">矿</span>`}<h3>${item.name}</h3><p>${item.kind} · 拥有 ${item.count} 件</p><p>${item.description}</p>`:'<h3>行囊待满</h3><p>收集花卉、到村外采矿，或向铁师傅领取武师赠剑。</p>';
+      if(item?.weapon){const button=document.createElement('button');button.type='button';button.className='equip-button';const equipped=this.economy.equippedId===item.weapon.id;button.textContent=equipped?'卸下武器 · 恢复徒手':'装备'+item.name;button.onclick=()=>{this.economy.equip(equipped?null:item.weapon.id);this.onGearChange();this.render();};detail.append(button);}
       document.querySelector('#bag-save').textContent=this.store.saved?'花卉收藏自动保存在当前浏览器。':'当前浏览器无法保存，收藏将在关闭页面后丢失。';
       document.querySelector('#discard-menu').hidden=!this.pendingDiscard;
-      if(this.pendingDiscard)document.querySelector('#discard-name').textContent=`丢弃 ${Gathering.items[this.pendingDiscard].name} ×1？`;
+      if(this.pendingDiscard)document.querySelector('#discard-name').textContent=`丢弃 ${this.item(this.pendingDiscard).name} ×1？`;
     }
   }
   window.InventoryView=InventoryView;

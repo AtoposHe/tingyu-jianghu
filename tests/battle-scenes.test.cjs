@@ -25,7 +25,7 @@ async function run(){
   const context={console,Image,Map,Object,Math,Promise,ResizeObserver:class{observe(){}},
     document:{querySelector:el,createElement:()=>new Element(),addEventListener(){}},
     QSprites:{load:()=>Promise.resolve(),height:275},BattleFX:class{},
-    Martial:require('../martial.js'),CombatRules:require('../combat-rules.js'),BattleMoves:require('../battle-moves.js'),
+    Forge:require('../forge.js'),Martial:require('../martial.js'),CombatRules:require('../combat-rules.js'),BattleMoves:require('../battle-moves.js'),
     requestAnimationFrame:()=>1,cancelAnimationFrame(){},devicePixelRatio:1,addEventListener(){}};
   context.window=context;vm.createContext(context);
   for(const file of ['battle-scenes.js','battle.js'])vm.runInContext(fs.readFileSync(path.join(__dirname,'..',file),'utf8'),context);
@@ -46,6 +46,9 @@ async function run(){
   assert.ok(b.floaters.some(f=>f.text==='灵力 -8'));
   assert.equal(el('#skill-name').textContent,'推山掌');assert.equal(el('#skill-key').textContent,'2');
   b.motion=null;b.busy=false;b.state.phase='player';b.state.hero.mp=7;b.attack('skill');assert.equal(b.motion,null,'Low spirit must not begin an animation');
+  b.equipment=new context.Forge.ForgeState();b.equipment.acceptCommission();b.equipment.claim();b.start('trainer');await flush();b.attack();
+  assert.equal(b.motion.profile.id,'slash');assert.equal(b.state.hero.weaponId,'qingfeng');b.hit();assert.equal(b.state.enemy.hp,348);
+  assert.equal(el('#attack-label').textContent,'基础劈砍');assert.match(el('#attack-hint').textContent,/青锋剑/);
   console.log('PASS opponent scenes, async race protection, rematch, learned hero skill animation, impact cost/guard and insufficient-spirit input');
 }
 module.exports=run();

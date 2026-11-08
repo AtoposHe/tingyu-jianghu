@@ -9,7 +9,8 @@
   const heroRun=new HeroRun(),footDust=[];
   const npc = { id:'elder', name:'老村长', role:'听雨村 · 村长', src:'assets/q/village-chief.png', ...VillageMap.elder };
   const trainer = { id:'trainer', name:'武青山', role:'听雨村 · 武师', src:'assets/q/trainer-idle.png', ...VillageMap.trainer };
-  const villagers = [npc,trainer];
+  const smith={id:'smith',name:'铁师傅',role:'溪南铁铺 · 铁匠',src:'assets/q/blacksmith.png',...VillageMap.smith};
+  const villagers = [npc,trainer,smith];
   let activeNpc=npc;
   const spawn = VillageMap.spawn;
   const keys = new Set();
@@ -21,14 +22,16 @@
   let toastTimer, audioContext = null, soundNodes = [], soundOn = false;
   let storage;try{storage=window.localStorage;}catch{}
   const martial=new Martial.Progression(storage);
+  const economy=new Forge.ForgeState(storage);
   const battle = new SparringBattle((result,hadSkill) => {
     martial.recordBattle(result,hadSkill);
     if(hadSkill&&['victory','defeat'].includes(result))markStory('practice');
     cultivation.render();
     keys.clear();heroRun.reset();footDust.length=0;lastTime=0;canvas.focus({preventScroll:true});
     if(martial.needsLesson){openDialogue(trainer);showNode('trainerLesson');}
+    else if(martial.practiced&&!economy.commission){openDialogue(trainer);showNode('trainerGift');}
     else announce('已返回听雨村。切磋点到即止，伤势已恢复。');
-  },martial);
+  },martial,economy);
 
   const walkable=VillageMap.walkable;
   const findPath=VillageMap.findPath;
@@ -36,28 +39,37 @@
   const keepsakes=new Gathering(storage);
   let chosenFlower=null;
   function stopCollecting(){chosenFlower=null;$('#gather-prompt').hidden=true;$('#interaction').hidden=true;}
-  const bag=new InventoryView(keepsakes,()=>{stopCollecting();keys.clear();path=[];destination=null;pendingTalk=false;heroRun.reset();hero.walking=false;},martial,()=>cultivation.render());
+  const bag=new InventoryView(keepsakes,()=>{if(smithy.active||outskirts.active)return false;stopCollecting();keys.clear();path=[];destination=null;pendingTalk=false;heroRun.reset();hero.walking=false;},martial,()=>cultivation.render(),economy,()=>syncEquipment());
   bag.render();
   const chronicle=new JianghuStory(storage);
   const storyView=new StoryView(chronicle,()=>{
-    if(battle.active||dialogueOpen||bag.active||cultivation.active)return false;
+    if(battle.active||dialogueOpen||bag.active||cultivation.active||smithy.active||outskirts.active)return false;
     stopCollecting();keys.clear();path=[];destination=null;pendingTalk=false;heroRun.reset();hero.walking=false;
   },()=>{keys.clear();lastTime=0;canvas.focus({preventScroll:true});});
   const cultivation=new CultivationView(martial,()=>{
-    if(battle.active||dialogueOpen||bag.active||storyView.active||cultivation.active)return false;
+    if(battle.active||dialogueOpen||bag.active||storyView.active||cultivation.active||smithy.active||outskirts.active)return false;
     stopCollecting();keys.clear();path=[];destination=null;pendingTalk=false;heroRun.reset();hero.walking=false;
   },()=>{keys.clear();lastTime=0;canvas.focus({preventScroll:true});},()=>{
     if(martial.cultivation>=1)markStory('meditate');
   });
+  function stopExploring(){stopCollecting();keys.clear();path=[];destination=null;pendingTalk=false;heroRun.reset();hero.walking=false;}
+  function returnToMap(){keys.clear();lastTime=0;canvas.focus({preventScroll:true});}
+  const outskirts=new OutskirtsView(economy,()=>{
+    if(battle.active||dialogueOpen||bag.active||storyView.active||cultivation.active||smithy.active||outskirts.active)return false;
+    stopExploring();
+  },returnToMap,()=>syncEquipment());
+  const smithy=new SmithyView(economy,returnToMap,()=>syncEquipment(),()=>outskirts.open());
+  function syncEquipment(){bag.render();cultivation.render();if(economy.commission)markStory('commission');if(economy.claimed)markStory('sword');if(economy.crafted)markStory('forge');}
   // Older story saves cannot bypass the new lesson; new cultivation progress restores its goals.
   if(!martial.learned){chronicle.flags.spar=false;chronicle.flags.meditate=false;chronicle.flags.practice=false;chronicle.save();}
   else {markStory('spar');if(martial.cultivation>=1)markStory('meditate');if(martial.practiced)markStory('practice');}
+  syncEquipment();
   storyView.open();
   function markStory(flag){chronicle.mark(flag);storyView.render();}
   function flowerNear(node){return Math.hypot(hero.x-node.x,hero.y-node.y)<66&&Math.abs(VillageMap.surfaceAt(hero.x,hero.y).height-VillageMap.surfaceAt(node.x,node.y).height)<2&&VillageMap.canStep(hero,node);}
   function nearestFlower(){return chosenFlower&&flowerNear(chosenFlower)?chosenFlower:Gathering.nodes.filter(flowerNear).sort((a,b)=>Math.hypot(a.x-hero.x,a.y-hero.y)-Math.hypot(b.x-hero.x,b.y-hero.y))[0];}
   function syncFlower(){
-    const nearby=closestNpc(),node=nearestFlower(),blocked=dialogueOpen||battle.active||bag.active||storyView.active||cultivation.active;
+    const nearby=closestNpc(),node=nearestFlower(),blocked=dialogueOpen||battle.active||bag.active||storyView.active||cultivation.active||smithy.active||outskirts.active;
     const talk=$('#interaction'),flower=$('#gather-prompt');
     talk.hidden=blocked||!nearby;flower.hidden=blocked||!!nearby||!node;
     if(nearby&&talk.dataset.npc!==nearby.id){talk.dataset.npc=nearby.id;const kbd=document.createElement('kbd');kbd.textContent='E';talk.replaceChildren(kbd,document.createTextNode(` 与${nearby.name}交谈`));}
@@ -67,7 +79,7 @@
     flower.disabled=remaining>0;
   }
   function confirmFlower(){
-    if(dialogueOpen||battle.active||bag.active||storyView.active||cultivation.active||closestNpc())return;
+    if(dialogueOpen||battle.active||bag.active||storyView.active||cultivation.active||smithy.active||outskirts.active||closestNpc())return;
     const node=nearestFlower();if(!node)return announce('请先走近路边花草，再按 F 收集。');
     if(keepsakes.remaining(node))return announce('花材还在再生，稍后再来看看。');
     keys.clear();path=[];destination=null;pendingTalk=false;heroRun.reset();
@@ -98,6 +110,9 @@
     trainerBreathing: { text:'但招式撑得一时，根基才撑得长久。打坐时凝神调息，静修两分钟，灵力上限才增一点，气血也增两点；灵力决定境界，每境分十段。淬体到一百点时，必须完成突破历练才能进入通脉；历练尚未开启时就先收功，不能硬练越境。莫急，回合间双方都会自然回灵。', choices:[['谨记教诲，学习推山掌与吐纳法。','learnMartial'],['容我再想想。','trainerBye']] },
     trainerLearned: { text:'推山掌与吐纳法已记下。按 R 查看修为并开始打坐；每回合结束，你会回灵两点。现在再试一次，用推山掌护势，应能多撑几招。仍胜不了我也无妨，日积月累才有精进。', choices:[['以推山掌再次请教！','startBattle'],['先打坐修炼。','openCultivation'],['稍后再来。','trainerBye']] },
     trainerReturn: { text:'掌势可曾记牢？你我都遵循同样的修炼之道：修为进境，气血灵力随之增长，境界提升后拳劲、防御与回灵也会增长。打坐贵在恒久，切磋贵在体会。', choices:[['请指教，切磋一场。','startBattle'],['去打坐修炼。','openCultivation'],['稍后再来。','trainerBye']] },
+    trainerGift: {text:'掌势虽嫩，你已经懂得进退。你师父当年护镖用的是剑，我托溪南铁铺的铁师傅留了一把青锋，赠你作启程之礼。拿这张凭条去领取吧。记住，佩剑先问为何出鞘。',choices:[['收下取剑凭条。','acceptSword'],['容我稍后再来。','trainerBye']]},
+    trainerGiftAccepted: {text:'取剑凭条收好了。铁铺在村子的右侧，门朝西，铁师傅就在门前。取到剑后，在行囊里装备它，出手便是基础劈砍。日后到村外石坡采得矿石，也可请他锻造更合手的剑。',choices:[['这就去铁铺取剑。','findSmith'],['我先在村中走走。','trainerBye']]},
+    trainerGiftReminder: {text:'那把青锋还在铁师傅手中。沿东巷去村子右侧的溪南铁铺，凭条领取便是。他也收购矿石，你若缺盘缠，可以采些多余的矿石换金币。',choices:[['前往溪南铁铺。','findSmith'],['再请教一次拳脚。','startBattle'],['稍后再去。','trainerBye']]},
     trainerBye: { text:'好，练武贵在持之以恒。我就在听雨武馆门前，少侠随时可以来找我。', next:null },
   };
   function showNode(id) {
@@ -118,7 +133,9 @@
           if(id==='startBattle') {
             closeDialogue();keys.clear();path=[];destination=null;pendingTalk=false;
             $('#interaction').hidden=true;battle.start(activeNpc.id);
-          } else if(id==='learnMartial') {
+          } else if(id==='acceptSword'){economy.acceptCommission();syncEquipment();showNode('trainerGiftAccepted');}
+          else if(id==='findSmith'){closeDialogue();requestTalk(smith);}
+          else if(id==='learnMartial') {
             if(martial.learn()){markStory('spar');cultivation.render();bag.render();announce('习得推山掌与吐纳法 · 战斗按 2 施掌，地图按 R 修炼');}
             showNode('trainerLearned');
           } else if(id==='openCultivation'){closeDialogue();cultivation.open();}
@@ -133,6 +150,7 @@
   }
   function openDialogue(person=npc) {
     if(dialogueOpen) return;
+    if(person===smith){stopExploring();smithy.open();return;}
     stopCollecting();
     activeNpc=person;
     path=[]; destination=null; pendingTalk=false; keys.clear();heroRun.reset();hero.walking=false;
@@ -142,7 +160,7 @@
     $('.portrait-wrap img').alt=person.name;
     $('#npc-identity').textContent=person.name+' · '+person.role.split(' · ').pop();
     $('#npc-realm').textContent=Martial.person(person.id).realmName;
-    showNode(person===trainer?(martial.needsLesson?'trainerLesson':martial.learned?'trainerReturn':'trainer'):completed?'return':'greeting');
+    showNode(person===trainer?(martial.needsLesson?'trainerLesson':martial.learned?(martial.practiced&&!economy.commission?'trainerGift':economy.commission&&!economy.claimed?'trainerGiftReminder':'trainerReturn'):'trainer'):completed?'return':'greeting');
     $('#dialogue-next').focus({preventScroll:true});
   }
   function closeDialogue() {
@@ -168,7 +186,7 @@
   const nearNpc=(person)=>Math.hypot(hero.x-person.x,hero.y-person.y)<78&&Math.abs(VillageMap.surfaceAt(hero.x,hero.y).height-VillageMap.surfaceAt(person.x,person.y).height)<2;
   const closestNpc=()=>villagers.filter(nearNpc).sort((a,b)=>Math.hypot(hero.x-a.x,hero.y-a.y)-Math.hypot(hero.x-b.x,hero.y-b.y))[0];
   function requestTalk(person=npc) {
-    if(battle.active||storyView.active||bag.active||cultivation.active)return;
+    if(battle.active||storyView.active||bag.active||cultivation.active||smithy.active||outskirts.active)return;
     stopCollecting();
     if(nearNpc(person)) return openDialogue(person);
     const target=person.talk||{x:person.x,y:person.y+45};
@@ -178,9 +196,11 @@
   }
   $('#find-trainer').addEventListener('click',()=>requestTalk(trainer));
   $('#quest').addEventListener('click',()=>{
-    if(storyView.active||bag.active||battle.active||dialogueOpen||cultivation.active)return;
+    if(storyView.active||bag.active||battle.active||dialogueOpen||cultivation.active||smithy.active||outskirts.active)return;
     if(chronicle.next==='chief')requestTalk(npc);
-    else if(['spar','practice'].includes(chronicle.next))requestTalk(trainer);
+    else if(['spar','practice','commission'].includes(chronicle.next))requestTalk(trainer);
+    else if(chronicle.next==='sword')requestTalk(smith);
+    else if(chronicle.next==='forge'){if(economy.ores.iron>=4&&economy.ores.copper>=1)requestTalk(smith);else outskirts.open();}
     else if(chronicle.next==='meditate')cultivation.open();
     else if(chronicle.next==='flowers'){
       const node=Gathering.nodes.filter(n=>!keepsakes.remaining(n)).sort((a,b)=>Math.hypot(a.x-hero.x,a.y-hero.y)-Math.hypot(b.x-hero.x,b.y-hero.y))[0];
@@ -199,6 +219,8 @@
   window.addEventListener('keydown',e=>{
     if(battle.active)return;
     if(storyView.active){storyView.handleKey(e);return;}
+    if(smithy.active){smithy.handleKey(e);return;}
+    if(outskirts.active){outskirts.handleKey(e);return;}
     if(cultivation.active){cultivation.handleKey(e);return;}
     const key=e.key.toLowerCase();
     if(bag.active){
@@ -226,7 +248,7 @@
   window.addEventListener('blur',()=>keys.clear());
   document.addEventListener('visibilitychange',()=>{keys.clear();lastTime=0;if(document.hidden&&audioContext?.state==='running')audioContext.suspend();else if(!document.hidden&&soundOn)audioContext?.resume();});
   canvas.addEventListener('pointerdown',e=>{
-    if(dialogueOpen||battle.active||bag.active||storyView.active||cultivation.active) return;
+    if(dialogueOpen||battle.active||bag.active||storyView.active||cultivation.active||smithy.active||outskirts.active) return;
     stopCollecting();
     canvas.focus({preventScroll:true});
     const rect=canvas.getBoundingClientRect();
@@ -261,7 +283,7 @@
     hero.walking=false;
     if(battle.active){heroRun.reset();footDust.length=0;return;}
     if(storyView.active){heroRun.reset();return;}
-    if(bag.active||cultivation.active){heroRun.reset();return;}
+    if(bag.active||cultivation.active||smithy.active||outskirts.active){heroRun.reset();return;}
     for(let i=footDust.length-1;i>=0;i--) {
       footDust[i].life-=dt;if(footDust[i].life<=0)footDust.splice(i,1);
     }
@@ -326,9 +348,9 @@
     if(isHero) {
       // A short blend avoids snapping between the guard and first/last stride.
       ctx.globalAlpha=1-heroRun.blend;
-      QSprites.drawImage(ctx,image,'heroIdle',77);
+      WeaponSprites.drawHero(ctx,'heroIdle',77,economy.equippedId);
       ctx.globalAlpha=heroRun.blend;
-      QSprites.draw(ctx,heroRun.frame,77);
+      WeaponSprites.drawHero(ctx,heroRun.frame,77,economy.equippedId);
       ctx.globalAlpha=1;
     } else if(person===trainer)QSprites.drawImage(ctx,image,'enemyIdle',77);
     else {const ratio=image.naturalWidth/image.naturalHeight;const w=77*ratio;ctx.drawImage(image,-w/2,-77,w,77);}
@@ -340,7 +362,7 @@
     if(!isHero) {
       const b=Math.sin(elapsed*3)*3;
       roundRect(x-10,y-111+b,20,22,6,person===trainer?'#ead5ab':completed?'#f1edcf':'#f5e5a9','#a8915a');
-      ctx.fillStyle='#8d713c';ctx.font='bold 14px serif';ctx.fillText(person===trainer?'武':completed?'…':'!',x,y-95+b);
+      ctx.fillStyle='#8d713c';ctx.font='bold 14px serif';ctx.fillText(person===smith?'锻':person===trainer?'武':completed?'…':'!',x,y-95+b);
     }
   }
   function draw() {
@@ -363,7 +385,8 @@
     // Independent PNG buildings/foliage interleave with actors by foot depth.
     const actors=[{y:hero.y,draw:()=>character(images.hero,hero.x,hero.y,true)},
       {y:npc.y,draw:()=>character(images.npc,npc.x,npc.y,false,npc)},
-      {y:trainer.y,draw:()=>character(images.trainer,trainer.x,trainer.y,false,trainer)}];
+      {y:trainer.y,draw:()=>character(images.trainer,trainer.x,trainer.y,false,trainer)},
+      {y:smith.y,draw:()=>character(images.smith,smith.x,smith.y,false,smith)}];
     for(const node of Gathering.nodes)actors.push({y:node.y,draw:()=>{
       const ready=!keepsakes.remaining(node),near=flowerNear(node),size=node.item==='lotus'?66:55;
       ctx.save();ctx.globalAlpha=ready?1:.48;ctx.drawImage(images[node.item],node.x-size/2,node.y-size,size,size);ctx.restore();
@@ -416,9 +439,9 @@
   $('#sound-toggle').addEventListener('click',toggleSound);
   function loadImage(src) {return new Promise((resolve,reject)=>{const img=new Image();img.onload=()=>resolve(img);img.onerror=()=>reject(new Error(src));img.src=src;});}
   const mapLoads=Object.entries(VillageMap.assets).map(async ([key,src])=>[key,await loadImage(src)]);
-  Promise.all([Promise.all(mapLoads),loadImage('assets/q/hero-idle.png'),loadImage('assets/q/village-chief.png'),loadImage('assets/q/trainer-idle.png'),QSprites.load()])
-    .then(([mapLayers,heroImage,npcImage,trainerImage])=>{
-      Object.assign(images,Object.fromEntries(mapLayers),{hero:heroImage,npc:npcImage,trainer:trainerImage});resize();
+  Promise.all([Promise.all(mapLoads),loadImage('assets/q/hero-idle.png'),loadImage('assets/q/village-chief.png'),loadImage('assets/q/trainer-idle.png'),loadImage('assets/q/blacksmith.png'),Promise.all([QSprites.load(),WeaponSprites.load()])])
+    .then(([mapLayers,heroImage,npcImage,trainerImage,smithImage])=>{
+      Object.assign(images,Object.fromEntries(mapLayers),{hero:heroImage,npc:npcImage,trainer:trainerImage,smith:smithImage});resize();
       camera.x=Math.max(0,Math.min(WORLD.width-camera.width,hero.x-camera.width/2));
       $('#loading').hidden=true;$('#story-enter').disabled=false;animationId=requestAnimationFrame(frame);
     }).catch(error=>{console.error('地图素材加载失败',error);$('#loading').textContent='画卷加载失败，请刷新页面，或通过启动脚本打开。';});

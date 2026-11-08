@@ -112,7 +112,7 @@
     return [];
   }
   const api={width,height,props,stairs,terraces,riverCenter,surfaceAt,walkable,canStep,findPath,
-    spawn:{x:552,y:904},elder:{x:1128,y:760,talk:{x:1128,y:792}},trainer:{x:1112,y:249,talk:{x:1128,y:280}},
+    smith:{x:1304,y:670,talk:{x:1288,y:696}},spawn:{x:552,y:904},elder:{x:1128,y:760,talk:{x:1128,y:792}},trainer:{x:1112,y:249,talk:{x:1128,y:280}},
     assets:{terrain:'assets/maps/terrain.png',inn:'assets/maps/inn.png',training:'assets/town/dojo.png',homes:'assets/maps/homes.png',smithy:'assets/town/smithy-left.png',winehouse:'assets/town/winehouse.png',guesthouse:'assets/town/guesthouse.png',tree:'assets/maps/tree.png',jasmine:'assets/town/jasmine.png',osmanthus:'assets/town/osmanthus.png',lotus:'assets/town/lotus.png'}};
   if(typeof module!=='undefined'&&module.exports)module.exports=api;else window.VillageMap=api;
 })();

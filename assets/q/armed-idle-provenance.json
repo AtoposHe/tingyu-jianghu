@@ -1,0 +1,33 @@
+{
+  "tool": "built-in image_gen",
+  "assets": [
+    {
+      "id": "wood",
+      "path": "assets/q/hero-wood-idle.png",
+      "prompt": "Use case: identity-preserve. Create a COMPLETE FULL-BODY transparent PNG game sprite of the EXACT SAME guofeng chibi young male hero as reference image 1, in a NEW RELAXED SWORD-HOLDING IDLE POSE. Reference image 1 is hero identity and costume, reference image 2 is the actual weapon design: a warm brown wooden training jian, simple wooden crossguard and dark cloth grip. He is standing naturally, three-quarter view facing right, both boots planted, shoulders relaxed. His RIGHT arm hangs comfortably at his right side with elbow slightly bent, right hand beside the hip holding the sword in a physically correct single-handed SABER/JIAN GRIP. The actual hilt MUST pass through his palm. Four fingers CURL COMPLETELY AROUND the cylindrical grip; the thumb opposes and rests over the index finger, the thumb-index web points toward the guard, the wrist remains straight and aligned with the forearm. Clearly draw the hand's side/back gripping a REAL sword handle, NOT a boxing fist, NOT a fist pointing toward the viewer, NOT a handle touching the back of a fist. Crossguard lies immediately ABOVE the thumb-index web; pommel lies BELOW the little finger, outside the hand. The blade extends FORWARD AND DOWN toward the lower right, its tip stays above boot ground height. Left hand rests naturally near the belt. This is an unhurried carrying stance, NOT attacking or fencing guard. Keep brown ponytail/topknot gold-jade crown, teal white embroidered robe gold cloud trim bamboo pattern front panel jade belt red tassel. Same large-head small-body ratio, beautiful detailed hand-painted wuxia watercolor game art and delicate warm outlines. Show the WHOLE sword, blade guard grip pommel, ALL fingers, BOTH arms, BOTH legs and boots, all hair, no cropping. Full character and weapon centered with padding, genuinely transparent alpha, no backdrop, no shadow, no aura, no effects, no text.",
+      "references": [
+        "assets/q/hero-idle.png",
+        "assets/weapons/wood.png"
+      ]
+    },
+    {
+      "id": "qingfeng",
+      "path": "assets/q/hero-qingfeng-idle.png",
+      "prompt": "Use case: identity-preserve. Create a COMPLETE FULL-BODY transparent PNG game sprite of the EXACT SAME guofeng chibi young male hero as reference image 1, in a NEW RELAXED SWORD-HOLDING IDLE POSE. Reference image 1 is hero identity and costume, reference image 2 is the actual weapon design: the exact slender silver Qingfeng jian in the weapon reference, brass cloud guard and teal wrapped grip. He is standing naturally, three-quarter view facing right, both boots planted, shoulders relaxed. His RIGHT arm hangs comfortably at his right side with elbow slightly bent, right hand beside the hip holding the sword in a physically correct single-handed SABER/JIAN GRIP. The actual hilt MUST pass through his palm. Four fingers CURL COMPLETELY AROUND the cylindrical grip; the thumb opposes and rests over the index finger, the thumb-index web points toward the guard, the wrist remains straight and aligned with the forearm. Clearly draw the hand's side/back gripping a REAL sword handle, NOT a boxing fist, NOT a fist pointing toward the viewer, NOT a handle touching the back of a fist. Crossguard lies immediately ABOVE the thumb-index web; pommel lies BELOW the little finger, outside the hand. The blade extends FORWARD AND DOWN toward the lower right, its tip stays above boot ground height. Left hand rests naturally near the belt. This is an unhurried carrying stance, NOT attacking or fencing guard. Keep brown ponytail/topknot gold-jade crown, teal white embroidered robe gold cloud trim bamboo pattern front panel jade belt red tassel. Same large-head small-body ratio, beautiful detailed hand-painted wuxia watercolor game art and delicate warm outlines. Show the WHOLE sword, blade guard grip pommel, ALL fingers, BOTH arms, BOTH legs and boots, all hair, no cropping. Full character and weapon centered with padding, genuinely transparent alpha, no backdrop, no shadow, no aura, no effects, no text.",
+      "references": [
+        "assets/q/hero-idle.png",
+        "assets/weapons/qingfeng.png"
+      ]
+    },
+    {
+      "id": "steel",
+      "path": "assets/q/hero-steel-idle.png",
+      "prompt": "Use case: identity-preserve. Create a COMPLETE FULL-BODY transparent PNG game sprite of the EXACT SAME guofeng chibi young male hero as reference image 1, in a NEW RELAXED SWORD-HOLDING IDLE POSE. Reference image 1 is hero identity and costume, reference image 2 is the actual weapon design: the exact broad dark steel jian in the weapon reference, black copper-inlaid angular guard and burgundy grip. He is standing naturally, three-quarter view facing right, both boots planted, shoulders relaxed. His RIGHT arm hangs comfortably at his right side with elbow slightly bent, right hand beside the hip holding the sword in a physically correct single-handed SABER/JIAN GRIP. The actual hilt MUST pass through his palm. Four fingers CURL COMPLETELY AROUND the cylindrical grip; the thumb opposes and rests over the index finger, the thumb-index web points toward the guard, the wrist remains straight and aligned with the forearm. Clearly draw the hand's side/back gripping a REAL sword handle, NOT a boxing fist, NOT a fist pointing toward the viewer, NOT a handle touching the back of a fist. Crossguard lies immediately ABOVE the thumb-index web; pommel lies BELOW the little finger, outside the hand. The blade extends FORWARD AND DOWN toward the lower right, its tip stays above boot ground height. Left hand rests naturally near the belt. This is an unhurried carrying stance, NOT attacking or fencing guard. Keep brown ponytail/topknot gold-jade crown, teal white embroidered robe gold cloud trim bamboo pattern front panel jade belt red tassel. Same large-head small-body ratio, beautiful detailed hand-painted wuxia watercolor game art and delicate warm outlines. Show the WHOLE sword, blade guard grip pommel, ALL fingers, BOTH arms, BOTH legs and boots, all hair, no cropping. Full character and weapon centered with padding, genuinely transparent alpha, no backdrop, no shadow, no aura, no effects, no text.",
+      "references": [
+        "assets/q/hero-idle.png",
+        "assets/weapons/steel.png"
+      ]
+    }
+  ],
+  "notes": "Three complete resting sword-holding illustrations redraw the hand, wrist and hilt relationship rather than placing a weapon on a fist. Original PNG pixels and alpha preserved."
+}

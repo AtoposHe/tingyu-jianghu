@@ -5,20 +5,20 @@
   const clamp = (n, lo=0, hi=1) => Math.min(hi, Math.max(lo,n));
   const ease = t => 1-Math.pow(1-clamp(t),3);
   class SparringBattle {
-    constructor(onReturn,progression=new Martial.Progression()) {
+    constructor(onReturn,progression=new Martial.Progression(),equipment=null) {
       this.root=document.querySelector('#battle');
       this.stage=document.querySelector('#battle-stage');
       this.canvas=document.querySelector('#battle-canvas');
       this.assetsReady=false;this.frameLoadError=false;this.hitPause=0;
       this.fx=new BattleFX();
       this.ctx=this.canvas.getContext('2d');
-      this.onReturn=onReturn;this.progression=progression;
+      this.onReturn=onReturn;this.progression=progression;this.equipment=equipment;
       this.active=false;this.state=null;this.motion=null;this.floaters=[];
       this.time=0;this.last=0;this.raf=0;this.wait=0;this.busy=false;
       this.background=null;this.sceneReady=false;this.sceneError=false;this.sceneVersion=0;this.opponentId='trainer';
       this.$=s=>this.root.querySelector(s);
       this.selectScene(this.opponentId);
-      QSprites.load().then(()=>{this.assetsReady=true;if(this.active)this.sync();}).catch(()=>{this.frameLoadError=true;if(this.active)this.sync();});
+      Promise.all([QSprites.load(),typeof WeaponSprites==='undefined'?Promise.resolve():WeaponSprites.load()]).then(()=>{this.assetsReady=true;if(this.active)this.sync();}).catch(()=>{this.frameLoadError=true;if(this.active)this.sync();});
       this.$('#attack-button').addEventListener('click',()=>this.attack());
       this.$('#skill-button').addEventListener('click',()=>this.attack('skill'));
       this.$('#battle-yield').addEventListener('click',()=>this.yield());
@@ -59,12 +59,12 @@
     start(opponentId=this.opponentId) {
       cancelAnimationFrame(this.raf);
       this.selectScene(opponentId);
-      this.state=CombatRules.create(this.progression.hero,opponentId);this.hadSkill=this.progression.learned;this.active=true;this.busy=false;
+      this.state=CombatRules.create(this.equipment?this.equipment.heroProfile(this.progression.hero):this.progression.hero,opponentId);this.hadSkill=this.progression.learned;this.active=true;this.busy=false;
       this.motion=null;this.floaters=[];this.wait=0;this.time=0;this.last=0;this.hitPause=0;
       this.root.hidden=false;this.root.closest('.game-frame').classList.add('in-battle');
       this.$('#battle-result').hidden=true;this.$('#combat-log').replaceChildren();
       this.log(`切磋开始。${this.state.hero.realmName}对${this.state.enemy.realmName}，双方气血、灵力回满。每整回合结束双方各自回灵。`);
-      this.resize();this.sync();this.callout('你的回合 · 以拳入江湖');
+      this.resize();this.sync();this.callout(this.state.hero.weaponId?'你的回合 · 以剑入江湖':'你的回合 · 以拳入江湖');
       this.$('#attack-button').focus({preventScroll:true});
       this.raf=requestAnimationFrame(t=>this.frame(t));
     }
@@ -80,6 +80,7 @@
       const frame=QSprites.chooseFrame(side,{attacking:active,progress:active?m.t/m.duration:0,
         action:m?.action,hitAt:m?.profile.hitAt,hit:(pose.recoil||0)>.12});
       c.save();c.rotate((pose.recoil||0)*.02);
+      if(side==='hero'&&this.state.hero.weaponId&&typeof WeaponSprites!=='undefined'&&!(active&&m.action==='skill')){WeaponSprites.drawHero(c,frame,QSprites.height,this.state.hero.weaponId,{slashing:active&&m.action==='normal',progress:active?m.t/m.duration:0,hitAt:m?.profile.hitAt});c.restore();return;}
       if(!QSprites.draw(c,frame,QSprites.height))QSprites.draw(c,side==='hero'?'heroIdle':'enemyIdle',QSprites.height);
       c.restore();
     }
@@ -105,6 +106,9 @@
       this.stage.classList.toggle('skill-active',this.motion?.action==='skill');
       const ready=this.assetsReady&&this.sceneReady&&!this.busy&&this.state.phase==='player';
       this.$('#attack-button').disabled=!ready;
+      this.$('#attack-label').textContent=this.state.hero.weaponId?'基础劈砍':'普通攻击';
+      this.$('#attack-hint').textContent=this.state.hero.weaponId?`${Forge.weapons[this.state.hero.weaponId].name} · 不耗灵力`:'徒手出拳 · 不耗灵力';
+      this.$('#attack-icon').textContent=this.state.hero.weaponId?'剑':'拳';
       const learned=this.state.hero.skills.includes('mountain'),skill=Martial.skills.mountain;
       this.$('#skill-button').disabled=!ready||!CombatRules.canSkill(this.state.hero);
       this.$('#skill-button').classList.toggle('is-learned',learned);
@@ -124,7 +128,7 @@
     }
     begin(side,action) {
       this.busy=true;this.wait=0;
-      const profile=BattleMoves.choose(side,action);
+      const profile=BattleMoves.choose(side,action,this.state[side].weaponId);
       this.motion={side,action,profile,round:this.state.round,t:0,duration:profile.duration,hit:false};
       this.callout(`${this.state[side].name} · ${profile.name}`);
       this.sync();
@@ -154,7 +158,7 @@
       const title=kind==='victory'?'切磋获胜':kind==='defeat'?'胜败乃兵家常事':'承让，下次再会';
       this.$('#result-title').textContent=title;
       this.$('#result-message').textContent=kind==='victory'
-        ?`经过 ${this.state.round} 回合，你凭修炼与拳掌赢得了武青山的认可。剩余气血 ${this.state.hero.hp}，灵力 ${this.state.hero.mp}。`
+        ?`经过 ${this.state.round} 回合，你凭修炼与${this.state.hero.weaponId?'剑掌':'拳掌'}赢得了武青山的认可。剩余气血 ${this.state.hero.hp}，灵力 ${this.state.hero.mp}。`
         :kind==='defeat'?(this.progression.needsLesson
           ?`第 ${this.state.round} 回合，武青山及时收掌：“你的根基尚浅，只靠蛮力撑不了多久。我传你一式推山掌，再教你打坐吐纳。灵力须一点点积累。”返回后向他请教。`
           :`交手 ${this.state.round} 回合后，武青山扶你站稳：“掌势已会，根基仍有差距。沉肩护住中门，日常打坐勤积灵力，切莫急求速成。”`)
@@ -209,7 +213,8 @@
       const attacker=m?.side,defender=attacker==='hero'?'enemy':'hero';
       const sinceHit=m?.hit?Math.max(0,(p-profile.hitAt)/(1-profile.hitAt)):0;
       const recoil=m?.hit?Math.sin(Math.min(1,sinceHit*1.7)*Math.PI):0;
-      const distance=Math.max(0,(pos.enemy.x-pos.hero.x)-112*pos.scale);
+      const reach=attacker==='hero'&&m?.profile.id==='slash'?230:112;
+      const distance=Math.max(0,(pos.enemy.x-pos.hero.x)-reach*pos.scale);
       const points={};
       if(m?.action==='skill')this.fx.background(c,{p,hitAt:profile.hitAt,pos,w,h,time:this.time});
       const shake=m?.action==='skill'?this.fx.shake(p,profile.hitAt):{x:0,y:0};
@@ -244,7 +249,7 @@
       if(m)this.effects(m,p,pose,pos,points);
       for(const side of ['hero','enemy']) {
         c.font='11px "Songti SC",serif';c.textAlign='center';c.fillStyle='#344c3b';c.strokeStyle='#fff7df';c.lineWidth=3;
-        const label=`${this.state[side].name} · ${this.state[side].skills.length?'拳掌':'徒手'}`;c.strokeText(label,pos[side].x,pos[side].y+24);c.fillText(label,pos[side].x,pos[side].y+24);
+        const label=`${this.state[side].name} · ${this.state[side].weaponId?Forge.weapons[this.state[side].weaponId].name:this.state[side].skills.length?'拳掌':'徒手'}`;c.strokeText(label,pos[side].x,pos[side].y+24);c.fillText(label,pos[side].x,pos[side].y+24);
       }
       for(const f of this.floaters) {
         if(f.t<0)continue;
@@ -265,6 +270,15 @@
         this.fx.foreground(c,{p,hitAt:m.profile.hitAt,actor,target,dir,s,time:this.time,w:this.width,h:this.height});return;
       }
       const elapsed=p-m.profile.hitAt;
+      if(m.profile.id==='slash'){
+        const progress=clamp((elapsed+.2)/.4),weapon=Forge.weapons[this.state.hero.weaponId];
+        if(elapsed>-.2&&elapsed<.25){
+          c.save();c.translate(target.x-dir*20*s,target.y-140*s);c.scale(dir*s,s);c.globalAlpha=Math.sin(progress*Math.PI)*.9;
+          for(let i=0;i<4;i++){c.strokeStyle=i===0?'#fff9e5':weapon.color;c.lineWidth=(14-i*3)*s;c.beginPath();c.ellipse(-15*s,0,(88-i*6)*s,(73-i*4)*s,-.45,-1.6+progress*.5,.8+progress*.4);c.stroke();}
+          c.restore();
+        }
+        if(elapsed>=0&&elapsed<.24){const t=elapsed/.24;c.save();c.translate(target.x,target.y-145*s);c.globalAlpha=1-t;c.strokeStyle=weapon.color;c.lineWidth=3;for(let i=0;i<13;i++){const a=i*2.4,r=(10+t*65)*s;c.beginPath();c.moveTo(Math.cos(a)*r,Math.sin(a)*r);c.lineTo(Math.cos(a)*(r+10*s),Math.sin(a)*(r+10*s));c.stroke();}c.restore();}return;
+      }
       if(elapsed>-.15&&elapsed<.08) {
         c.save();c.translate(actor.x,actor.y-145*s);c.scale(dir*s,s);c.globalAlpha=Math.sin(clamp((elapsed+.15)/.23)*Math.PI);
         for(let i=0;i<3;i++) {

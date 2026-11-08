@@ -12,7 +12,8 @@
   const skills=Object.freeze({mountain:books.get('mountain')});
   const people=Object.freeze({hero:Object.freeze({id:'hero',name:'无名少侠',spirit:20,skills:[]}),
     trainer:Object.freeze({id:'trainer',name:'武青山',spirit:150,skills:['mountain']}),
-    elder:Object.freeze({id:'elder',name:'老村长',spirit:20,skills:[]})});
+    elder:Object.freeze({id:'elder',name:'老村长',spirit:20,skills:[]}),
+    smith:Object.freeze({id:'smith',name:'铁师傅',spirit:60,skills:[]})});
   const spiritValue=value=>Number.isFinite(value)?Math.min(1000000000,Math.max(1,Math.floor(value))):20;
   function inferRealm(spirit){let rank=0;while(rank<6&&spirit>realms[rank].max)rank++;return rank;}
   function stats(value=20,unlocked=inferRealm(spiritValue(value)),title=''){

@@ -28,7 +28,7 @@
       // One full round, one recovery for each living participant, regardless of action.
       for(const who of ['hero','enemy']){const unit=state[who],amount=Math.min(unit.regen,unit.maxMp-unit.mp);unit.mp+=amount;recovery.push({side:who,amount});}
     }
-    return {side,action,damage,mpChange,recovery,guarded,guard:skill?.guard||0,move:skill?skill.name:side==='hero'?'直拳':'试探拳'};
+    return {side,action,damage,mpChange,recovery,guarded,guard:skill?.guard||0,move:skill?skill.name:side==='hero'?(actor.weaponId?'基础劈砍':'直拳'):'试探拳'};
   }
   const api=Object.freeze({create,resolve,enemyAction,canSkill});
   if(typeof module!=='undefined'&&module.exports)module.exports=api;else globalThis.CombatRules=api;

@@ -33,6 +33,7 @@
     const g=geometry(key,height);c.drawImage(image,g.sx,g.sy,g.sw,g.sh,g.dx,g.dy,g.dw,g.dh);return true;
   }
   function draw(c,key,height) {return drawImage(c,images[key],key,height);}
-  const api={height:275,data,load,chooseFrame,geometry,draw,drawImage};
+  function drawPatch(c,key,x,y,w,h,height){const image=images[key],frame=data[key];if(!image?.complete)return;const s=height/(frame.referenceHeight||frame.box[3]);c.drawImage(image,x,y,w,h,(x-frame.anchor[0])*s,(y-frame.anchor[1])*s,w*s,h*s);}
+  const api={drawPatch,height:275,data,load,chooseFrame,geometry,draw,drawImage};
   if(typeof module!=='undefined'&&module.exports)module.exports=api;else window.QSprites=api;
 })();

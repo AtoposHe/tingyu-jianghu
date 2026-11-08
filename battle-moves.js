@@ -4,10 +4,11 @@
   const smooth=n=>{n=clamp(n);return n*n*(3-2*n);};
   const profiles={
     straight:{id:'straight',name:'直拳',duration:1.5,hitAt:.47,color:'#e4bc6a',reaction:'jolt',knockback:7},
+    slash:{id:'slash',name:'基础劈砍',duration:1.75,hitAt:.53,color:'#c2e2df',reaction:'slash',knockback:14},
     jab:{id:'jab',name:'试探拳',duration:1.28,hitAt:.43,color:'#f5ebce',reaction:'flinch',knockback:4},
     mountain:{id:'mountain',name:'推山掌',duration:2.8,hitAt:.64,color:'#76bcc2',reaction:'knockback',knockback:30},
   };
-  function choose(side,action){return profiles[action==='skill'?'mountain':side==='hero'?'straight':'jab'];}
+  function choose(side,action,weaponId){return profiles[action==='skill'?'mountain':side==='hero'?(weaponId?'slash':'straight'):'jab'];}
   function sample(profile,p) {
     const hit=profile.hitAt;
     const palm=profile.id==='mountain';

@@ -8,7 +8,8 @@
   <link rel="stylesheet" href="style.css?v=3a0aa2c23633">
   <link rel="stylesheet" href="battle.css?v=35f61060bdd1">
   <link rel="stylesheet" href="map-ui.css?v=7aeaa9b37c58">
-  <link rel="stylesheet" href="inventory.css?v=929c3f7c7d96">
+  <link rel="stylesheet" href="inventory.css?v=2447b55187ff">
+  <link rel="stylesheet" href="smithy.css?v=ee4c5bae3f39">
   <link rel="stylesheet" href="cultivation.css?v=65242c907f69">
   <link rel="stylesheet" href="story.css?v=f303fef5de98">
 </head>
@@ -26,7 +27,7 @@
       <button id="interaction" class="interaction" type="button" hidden><kbd>E</kbd> 与老村长交谈</button>
       <div id="loading" class="loading">正在铺开江湖画卷…</div>
       <button id="gather-prompt" class="gather-prompt" type="button" hidden><kbd>F</kbd><span id="gather-label">收集</span></button>
-      <div class="map-bottom"><div class="map-buttons"><button id="bag-toggle" class="bag-button" type="button">行囊 <span id="bag-count">0</span> · B</button><button id="cultivation-toggle" class="map-action" type="button">修为 · R</button><button id="find-trainer" class="map-action" type="button">⚔ 寻访武师</button><button id="reset" class="map-action" type="button">↺ 回到村口</button></div></div>
+      <div class="map-bottom"><div class="map-buttons"><button id="bag-toggle" class="bag-button" type="button">行囊 <span id="bag-count">0</span> · B</button><button id="cultivation-toggle" class="map-action" type="button">修为 · R</button><button id="find-trainer" class="map-action" type="button">⚔ 寻访武师</button><button id="outskirts-toggle" class="map-action" type="button">村外石坡 · 采矿</button><button id="reset" class="map-action" type="button">↺ 回到村口</button></div></div>
       <div id="dialogue" class="dialogue" hidden role="dialog" aria-modal="true" aria-labelledby="speaker-name">
         <div class="portrait-wrap"><img src="assets/q/village-chief.png" alt="老村长，银发白须，拄着木杖，神情亲切"><div class="npc-information"><span id="npc-identity">老村长 · 村长</span><span id="npc-realm">淬体二段</span></div></div>
         <div class="dialogue-content"><div class="speaker-row"><h3 id="speaker-name">老村长</h3><button id="close-dialogue" aria-label="关闭对话" type="button">×</button></div><p id="dialogue-text"></p><div id="choices" class="choices"></div><button id="dialogue-next" type="button">继续 <span>↵</span></button></div>
@@ -43,16 +44,16 @@
           <div id="battle-callout" class="battle-callout">拳脚见真章，点到即止。</div>
           <div class="skill-title" aria-hidden="true"><small>听雨武学</small><strong>推山掌</strong><span>掌风如岳 · 劲贯山河</span></div><span class="stage-caption" id="stage-caption">武馆切磋 · 点到即止</span>
         </div>
-        <div class="battle-dock"><div class="battle-toolbar"><span class="q-mode-tag">国风Q版 · 以武会友</span><a href="effects.html" target="_blank" rel="noopener">招式观赏 ↗</a><a href="characters.html" target="_blank" rel="noopener">人物图鉴 ↗</a></div><div class="battle-log"><small>战况 · <span id="turn-hint">请选择行动</span></small><ol id="combat-log" aria-live="polite" aria-relevant="additions"></ol></div><div class="battle-actions"><button id="attack-button" class="attack-button" type="button"><span class="action-icon">拳</span><span><strong>普通攻击</strong><small>徒手出拳 · 不耗灵力</small></span><kbd>1</kbd></button><button id="skill-button" class="skill-button" type="button" disabled title="尚未习得技能，先与武师交手后请教。"><span class="action-icon">术</span><span><strong id="skill-name">技能攻击</strong><small id="skill-hint">尚未习得 · 暂不可用</small></span><span id="skill-key" class="locked-mark">锁</span></button></div><p id="battle-tip" class="battle-tip">双方每整回合结束恢复灵力，推山掌消耗 8 灵力。</p></div>
+        <div class="battle-dock"><div class="battle-toolbar"><span class="q-mode-tag">国风Q版 · 以武会友</span><a href="effects.html" target="_blank" rel="noopener">招式观赏 ↗</a><a href="characters.html" target="_blank" rel="noopener">人物图鉴 ↗</a></div><div class="battle-log"><small>战况 · <span id="turn-hint">请选择行动</span></small><ol id="combat-log" aria-live="polite" aria-relevant="additions"></ol></div><div class="battle-actions"><button id="attack-button" class="attack-button" type="button"><span id="attack-icon" class="action-icon">拳</span><span><strong id="attack-label">普通攻击</strong><small id="attack-hint">徒手出拳 · 不耗灵力</small></span><kbd>1</kbd></button><button id="skill-button" class="skill-button" type="button" disabled title="尚未习得技能，先与武师交手后请教。"><span class="action-icon">术</span><span><strong id="skill-name">技能攻击</strong><small id="skill-hint">尚未习得 · 暂不可用</small></span><span id="skill-key" class="locked-mark">锁</span></button></div><p id="battle-tip" class="battle-tip">双方每整回合结束恢复灵力，推山掌消耗 8 灵力。</p></div>
         <div id="battle-result" class="battle-result" hidden role="dialog" aria-modal="true" aria-labelledby="result-title"><div class="result-paper"><small>点到即止 · 以武会友</small><h3 id="result-title">切磋获胜</h3><p id="result-message"></p><div class="result-actions"><button id="battle-again" type="button">再切磋一次</button><button id="battle-return" type="button">返回听雨村 ↗</button></div></div></div>
       </section>
     </section>
     <footer class="below-map"><div class="character-chip"><img src="assets/q/hero-idle.png" alt="Q版无名少侠"><div><strong>无名少侠</strong><span>江湖路远，且行且看。</span></div><span id="map-hero-realm" class="level">淬体二段</span></div><div class="controls"><span><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> / 方向键移动</span><span><kbd>E</kbd> 交谈 · <kbd>1</kbd> 出拳 / <kbd>2</kbd> 推山掌</span><span class="mouse-hint">◇ 点击地面行走 · 点击人物交谈</span></div></footer>
-    <div class="page-note"><span>F 收集花卉 · B 行囊 · R 修炼</span><span>原创场景 · 藏经篇 11</span></div>
+    <div class="page-note"><span>F 收集花卉 · B 行囊 · R 修炼</span><span>原创场景 · 初剑篇 12</span></div>
     <div id="announcement" role="status" aria-live="polite"></div>
   </main>
   <section id="story-opening" class="story-overlay" role="dialog" aria-modal="true" aria-labelledby="story-title"><div class="story-paper"><span class="story-kicker">听雨江湖 · 第一回</span><h2 id="story-title">一封旧信，半枚镖牌</h2><p class="story-time">景和七年 · 暮春　｜　江南青州 · 听雨村　｜　架空江湖</p><div class="story-columns"><div class="story-copy"><p>十年前的夜渡镖案，早已成了茶客口中的旧闻。如今青州商道重开，封存的镖号却又出现在河埠的货箱上。听雨村依旧炊烟袅袅，平静之下，似有旧事回潮。</p><p>你十八岁，自幼被清河镖局收养，跟着师父做杂役、认路途，只学过几手粗浅拳脚。三个月前，师父随一趟镖队出门，从此音讯全无。你没有名门靠山，也不知自己的身世。</p><p>临行前，你从旧箱底找到半枚刻着水纹的镖牌，以及一封未寄出的信。信封上，只有四个字：听雨村长。</p><blockquote>“若有一日我未能归来，去听雨村。先问来路，再问刀剑。”</blockquote><p>你带着旧信走进村口。此行，先寻师父，也寻一个能让自己立足江湖的答案。</p></div><div class="story-plan"><h3>初入江湖 · 从这里开始</h3><ol id="story-goals"></ol><p class="story-future">后续故事规划 · 尚未开放<br>到杏花酒肆追访夜渡旧闻 → 请铁匠辨认镖牌水纹 → 沿商道寻找失踪镖队。选择如何待人、是否守诺，也将成为江湖成长的一部分。</p></div></div><button id="story-enter" class="story-enter" type="button" disabled>踏入听雨村 ↗</button></div></section>
-  <div id="inventory" class="bag-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="bag-title"><section class="bag-paper"><header class="bag-header"><div><small>江南拾芳 · 随身收藏</small><h2 id="bag-title">少侠行囊</h2></div><button type="button" class="bag-close" id="bag-close" aria-label="关闭背包">×</button></header><nav class="bag-tabs" aria-label="行囊分页"><button id="bag-items-tab" type="button" aria-pressed="true">花卉物品</button><button id="bag-books-tab" type="button" aria-pressed="false">功法典籍</button></nav><p id="bag-summary" class="bag-summary"></p><div id="bag-items" class="bag-content"><div id="bag-grid" class="bag-grid" aria-label="背包物品"></div><div class="bag-detail"><div id="bag-detail"></div><div id="discard-menu" class="discard-menu" hidden><p id="discard-name"></p><small>每次丢弃 1 件，丢弃后无法恢复。</small><button id="discard-confirm" type="button">F 确认丢弃</button><button id="discard-cancel" type="button">取消</button></div><p id="bag-feedback" role="status" aria-live="polite"></p></div></div><section id="bag-books" class="bag-books" hidden><p id="manual-empty" class="manual-empty">书架尚空。向武青山学习后，传授的内功与掌谱会收录于此。</p><div id="manual-grid" class="manual-grid"></div><article id="book-reader" class="book-reader" hidden><button id="book-back" type="button">← 返回书架</button><header><small id="book-source"></small><h3 id="book-title"></h3><span>完整功法原文 · 原创江湖典籍</span></header><div id="book-text" class="book-text"></div><section class="book-explanation"><h4>修习与施展说明</h4><p id="book-explanation"></p><button id="book-use" type="button">设为当前修炼功法</button></section></article></section><p id="bag-item-hint" class="bag-hint">靠近花草后按 F 收集 · 右键物品后按 F 丢弃 1 件 · Esc 取消 / B 关闭<br><span id="bag-save"></span></p></section></div>
+  <div id="inventory" class="bag-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="bag-title"><section class="bag-paper"><header class="bag-header"><div><small>江南拾芳 · 随身收藏</small><h2 id="bag-title">少侠行囊</h2></div><button type="button" class="bag-close" id="bag-close" aria-label="关闭背包">×</button></header><div class="bag-wallet"><span>金币 <strong id="bag-gold">50</strong></span><small id="bag-equipped">当前装备 · 徒手</small></div><nav class="bag-tabs" aria-label="行囊分页"><button id="bag-items-tab" type="button" aria-pressed="true">物品材料</button><button id="bag-books-tab" type="button" aria-pressed="false">功法典籍</button></nav><p id="bag-summary" class="bag-summary"></p><div id="bag-items" class="bag-content"><div id="bag-grid" class="bag-grid" aria-label="背包物品"></div><div class="bag-detail"><div id="bag-detail"></div><div id="discard-menu" class="discard-menu" hidden><p id="discard-name"></p><small>每次丢弃 1 件，丢弃后无法恢复。</small><button id="discard-confirm" type="button">F 确认丢弃</button><button id="discard-cancel" type="button">取消</button></div><p id="bag-feedback" role="status" aria-live="polite"></p></div></div><section id="bag-books" class="bag-books" hidden><p id="manual-empty" class="manual-empty">书架尚空。向武青山学习后，传授的内功与掌谱会收录于此。</p><div id="manual-grid" class="manual-grid"></div><article id="book-reader" class="book-reader" hidden><button id="book-back" type="button">← 返回书架</button><header><small id="book-source"></small><h3 id="book-title"></h3><span>完整功法原文 · 原创江湖典籍</span></header><div id="book-text" class="book-text"></div><section class="book-explanation"><h4>修习与施展说明</h4><p id="book-explanation"></p><button id="book-use" type="button">设为当前修炼功法</button></section></article></section><p id="bag-item-hint" class="bag-hint">靠近花草后按 F 收集 · 右键物品后按 F 丢弃 1 件 · Esc 取消 / B 关闭<br><span id="bag-save"></span></p></section></div>
   <section id="cultivation" class="cultivation-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="cultivation-title"><div class="cultivation-paper">
     <header><div><small>听雨江湖 · 功法修炼</small><h2 id="cultivation-title">静坐修心</h2></div><button id="cultivation-close" type="button" aria-label="关闭修炼">×</button></header>
     <div class="cultivation-layout"><div class="meditation-scene"><span class="meditation-inscription">守一息清宁 · 养方寸天地</span><div class="meditation-ground"></div><div class="qi-orbit orbit-one"></div><div class="qi-orbit orbit-two"></div><div class="qi-particles" aria-hidden="true"><i style="--i:0"></i><i style="--i:1"></i><i style="--i:2"></i><i style="--i:3"></i><i style="--i:4"></i><i style="--i:5"></i><i style="--i:6"></i><i style="--i:7"></i></div><img id="meditation-hero" src="assets/q/hero-meditation.png" alt="青衣少侠闭目盘腿，两手置于膝上，静坐修炼"><p id="meditation-status" role="status">心息归宁</p></div>
@@ -65,23 +66,32 @@
     <p id="cultivation-skill"></p><button id="meditate-toggle" type="button">开始打坐</button><p id="cultivation-save"></p></div></div>
     <p class="cultivation-rule">六境各分十段 · 灵力达到大境界上限时须先完成突破任务。关闭或切到后台即收功，不计算离线修炼。已学功法与招式可在行囊的“功法典籍”中阅读全文。</p>
   </div></section>
+  <section id="smithy" class="smithy-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="smithy-title"><div class="smithy-paper"><header class="smithy-header"><div><small>听雨村 · 溪南铁铺</small><h2 id="smithy-title">炉火初红，一剑启程</h2></div><div class="smithy-wallet">金币 <strong id="smithy-gold">50</strong></div><button id="smithy-close" type="button" aria-label="离开铁铺">×</button></header>
+    <div class="smithy-welcome"><div class="smithy-portrait"><img src="assets/q/blacksmith.png" alt="铁师傅，束布巾、着皮围裙，手持铁锤的国风Q版铁匠"><strong>铁师傅 · 铁匠</strong><span id="smithy-realm">淬体六段</span></div><div><p id="smithy-greeting"></p><button id="smithy-claim" type="button">凭条领取青锋剑 · 免费</button><p id="smithy-materials"></p><button id="smithy-mine" type="button">前往村外石坡采矿 ↗</button></div><div class="smithy-furnace" aria-hidden="true">火</div></div>
+    <div id="forge-order" class="forge-order" hidden><p id="forge-order-text"></p><button id="forge-confirm" type="button">确认交付</button><button id="forge-cancel" type="button">取消</button></div><p id="smithy-feedback" class="smithy-feedback" role="status" aria-live="polite"></p>
+    <section><h3>现货兵器 <small>金币购买 · 获得后在行囊装备</small></h3><div id="smithy-goods" class="smithy-goods"></div></section><section><h3>矿石锻造 <small>交付矿石与工钱 · 每次打造一把</small></h3><div id="smithy-recipes" class="smithy-recipes"></div></section><section class="smithy-sell"><h3>余矿回收 <small>出售多余矿石，换取盘缠</small></h3><div id="smithy-sell"></div></section></div></section>
+  <section id="outskirts" class="outskirts-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="outskirts-title"><div class="outskirts-paper"><header><div><small>听雨村外 · 石坡矿径</small><h2 id="outskirts-title">石间寻矿</h2></div><button id="outskirts-close" type="button">返回听雨村 ↗</button></header><p id="outskirts-stocks"></p><div class="outskirts-map"><div id="ore-nodes"></div></div><footer><p>点击矿点选择，按 F 确认采集。矿脉每 60 秒恢复；点击不会自动采集。</p><button id="mine-confirm" type="button" disabled>选择矿点后按 F 采集</button><p id="mine-feedback" role="status" aria-live="polite"></p></footer></div></section>
   <script src="manuals.js?v=c6a54bf7ae6a"></script>
-  <script src="martial.js?v=3503a70c435d"></script>
+  <script src="forge.js?v=d36cadf8b1d0"></script>
+  <script src="smithy.js?v=27e9a568b548"></script>
+  <script src="martial.js?v=727d2765d571"></script>
   <script src="cultivation.js?v=1d406b2e1b43"></script>
-  <script src="combat-rules.js?v=6ad256978d69"></script>
+  <script src="combat-rules.js?v=bc50f26f2c55"></script>
   
-  <script src="battle-moves.js?v=f5ea6c42d061"></script>
+  <script src="battle-moves.js?v=bbe866cf9f58"></script>
   <script src="sprite-data.js?v=fbec480159ad"></script>
-  <script src="sprites.js?v=988a672d74dd"></script>
+  <script src="sprites.js?v=fce576843c1c"></script>
+  <script src="weapon-art.js?v=522aec77b25c"></script>
+  <script src="weapon-sprites.js?v=f5ba4a2922e0"></script>
   <script src="hero-run.js?v=68e877566130"></script>
   <script src="battle-fx.js?v=576c2b19f755"></script>
   <script src="battle-scenes.js?v=ff601210da5a"></script>
-  <script src="battle.js?v=f11889470e33"></script>
-  <script src="village-map.js?v=37a599cad30b"></script>
+  <script src="battle.js?v=92bd259dc2a0"></script>
+  <script src="village-map.js?v=96ec6fc556aa"></script>
   <script src="gathering.js?v=d74dd4d7166d"></script>
-  <script src="inventory.js?v=a00f330e6171"></script>
-  <script src="story.js?v=c025d21b72da"></script>
-  <script src="story-view.js?v=4900e4b1dced"></script>
-  <script src="game.js?v=ba1ffb3e3328"></script>
+  <script src="inventory.js?v=050c5d02c7a4"></script>
+  <script src="story.js?v=a3adf9e7407e"></script>
+  <script src="story-view.js?v=bc3894be0da5"></script>
+  <script src="game.js?v=539b40138694"></script>
 </body>
 </html>

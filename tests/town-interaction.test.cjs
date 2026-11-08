@@ -1,28 +1,29 @@
 /* Run the real game input/update code with a small DOM test double. */
 const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
-const map=require('../village-map.js'),Gathering=require('../gathering.js'),HeroRun=require('../hero-run.js'),JianghuStory=require('../story.js'),Martial=require('../martial.js'),Manuals=require('../manuals.js');
+const map=require('../village-map.js'),Gathering=require('../gathering.js'),HeroRun=require('../hero-run.js'),JianghuStory=require('../story.js'),Martial=require('../martial.js'),Manuals=require('../manuals.js'),Forge=require('../forge.js');
 async function run(){
   const elements=new Map(),events={},storage=new Map();let frame,now=0,context,battleReturn;
   const drawing=new Proxy({}, {get:()=>()=>{}});
   class Element {
-    constructor(id=''){this.id=id;this.hidden=['#inventory','#cultivation'].includes(id);this.children=[];this.dataset={};this.style={};this.tagName=id==='#game'?'CANVAS':'DIV';this.textContent='';this.classList={add(){},remove(){},toggle(){}};}
+    constructor(id=''){this.id=id;this.hidden=['#inventory','#cultivation','#smithy','#outskirts'].includes(id);this.children=[];this.dataset={};this.style={};this.tagName=id==='#game'?'CANVAS':'DIV';this.textContent='';this.classList={add(){},remove(){},toggle(){}};}
     addEventListener(name,cb){this[name]=cb;}setAttribute(k,v){this[k]=v;}focus(){context.document.activeElement=this;}
     append(...els){this.children.push(...els);}replaceChildren(...v){this.children=v;}getContext(){return drawing;}
     getBoundingClientRect(){return {left:0,top:0,width:1280,height:800};}querySelector(id){return element(id);}querySelectorAll(){return [];}
   }
   const element=id=>{if(!elements.has(id))elements.set(id,new Element(id));return elements.get(id);};
   class Image {set src(value){this.complete=true;this.naturalWidth=100;this.naturalHeight=100;Promise.resolve().then(()=>this.onload?.());}}
-  context={console,Image,Gathering,HeroRun,JianghuStory,Martial,Manuals,VillageMap:map,devicePixelRatio:1,Math,Map,Set,Promise,Date,Number,
+  context={console,Image,Gathering,HeroRun,JianghuStory,Martial,Manuals,Forge:{...Forge,ForgeState:class extends Forge.ForgeState{constructor(storage){super(storage,()=>now);}}},VillageMap:map,devicePixelRatio:1,Math,Map,Set,Promise,Date,Number,
     localStorage:{getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,v)},
     document:{activeElement:element('#game'),querySelector:element,createElement:()=>new Element(),createTextNode:text=>({textContent:text}),addEventListener(){}},
     addEventListener:(key,cb)=>events[key]=cb,requestAnimationFrame:cb=>{frame=cb;return 1;},cancelAnimationFrame(){},
-    setTimeout:()=>1,clearTimeout(){},ResizeObserver:class{observe(){}},
-    SparringBattle:class{constructor(onReturn){this.active=false;battleReturn=onReturn;}},QSprites:{load:()=>Promise.resolve(),draw(){},drawImage(){}}
+    setTimeout:()=>1,clearTimeout(){},setInterval:()=>1,clearInterval(){},ResizeObserver:class{observe(){}},
+    WeaponSprites:{load:()=>Promise.resolve(),drawHero(){}},SparringBattle:class{constructor(onReturn){this.active=false;battleReturn=onReturn;}},QSprites:{load:()=>Promise.resolve(),draw(){},drawImage(){}}
   };
   context.window=context;vm.createContext(context);
   vm.runInContext(fs.readFileSync(require.resolve('../inventory.js'),'utf8'),context);
   vm.runInContext(fs.readFileSync(require.resolve('../story-view.js'),'utf8'),context);
   vm.runInContext(fs.readFileSync(require.resolve('../cultivation.js'),'utf8'),context);
+  vm.runInContext(fs.readFileSync(require.resolve('../smithy.js'),'utf8'),context);
   vm.runInContext(fs.readFileSync(require.resolve('../game.js'),'utf8'),context);
   for(let i=0;i<15;i++)await Promise.resolve();assert.ok(frame,'Game initializes after all map pictures load');
   const advance=count=>{for(let i=0;i<count;i++){now+=1000/60;frame(now);}};
@@ -76,6 +77,16 @@ async function run(){
   element('#close-dialogue').click();key('r');assert.equal(element('#cultivation').hidden,false,'R opens cultivation after teaching');
   key('Escape');assert.equal(element('#cultivation').hidden,true);
   battleReturn('defeat',true);assert.equal(new JianghuStory(context.localStorage).flags.practice,true,'A completed learned-skill rematch advances practice');
+  advance(500);const gift=element('#choices').children.find(b=>b.textContent.includes('收下取剑凭条'));assert.ok(gift);gift.click();
+  assert.equal(new Forge.ForgeState(context.localStorage).commission,true);advance(500);
+  element('#choices').children.find(b=>b.textContent.includes('这就去铁铺')).click();advance(1500);
+  assert.equal(element('#smithy').hidden,false,'Gift route reaches the smith at the left-facing forge door');
+  element('#smithy-claim').onclick();assert.equal(new Forge.ForgeState(context.localStorage).claimed,true);assert.equal(element('#bag-gold').textContent,'50');assert.match(element('#bag-equipped').textContent,/青锋剑/);
+  assert.equal(new JianghuStory(context.localStorage).flags.sword,true);key('Escape');key('b');
+  assert.equal(element('#inventory').hidden,false);assert.match(element('#bag-summary').textContent,/共 2 件/);key('Escape');
+  element('#outskirts-toggle').onclick();assert.equal(element('#outskirts').hidden,false);
+  const oreButtons=element('#ore-nodes').children;oreButtons[0].onclick();
+  assert.equal(new Forge.ForgeState(context.localStorage).ores.iron,0,'Selecting a mine never auto-collects');key('f');assert.equal(new Forge.ForgeState(context.localStorage).ores.iron,1);key('f');assert.equal(new Forge.ForgeState(context.localStorage).ores.iron,1,'F respects persistent mine cooldown');key('Escape');
   console.log('PASS real input/update: instant F collection, prompt priority, chief route/dialogue, cooldown and saved inventory');
 }
 module.exports=run();
